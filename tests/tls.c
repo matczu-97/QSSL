@@ -1,10 +1,5 @@
-#include <stdio.h>
-#include <string.h>
-
 #include "server.h"
 #include "client.h"
-
-
 
 
 int main() {
@@ -55,7 +50,7 @@ int main() {
     // Sign encrypted AES key with ECC
     unsigned char signature[128];  // Large enough for ECDSA signature
     unsigned int sig_len;
-    if (client.sign_aes_key(&client,encrypted_aes_key, encrypted_key_len,
+    if (!client.sign_aes_key(&client,encrypted_aes_key, encrypted_key_len,
         signature, &sig_len)) {
         handle_openssl_error();
     }
@@ -72,13 +67,11 @@ int main() {
     printf("Original message: %s\n", message);
     printf("Encrypted data length: %zu\n", encrypted_len);
 
-    // Verify and decrypt
-    unsigned char decrypted_data[MAX_DATA_SIZE];
-    size_t decrypted_len;
 
     BOOL res = server.verify_signature(&server, encrypted_aes_key, encrypted_key_len, signature, sig_len);
     res &= server.decrypt_aes_key(&server, encrypted_aes_key, encrypted_key_len, server.aes_key, &server.aes_key_len);
     res &= server.decrypt_data(&server, encrypted_data, encrypted_len, server.aes_key, iv, server.decrypted_data, &server.decrypted_len);
+
 
     if (res)
     {
@@ -97,6 +90,7 @@ int main() {
     EC_KEY_free(ecc_public_key);
     EVP_cleanup();
     ERR_free_strings();
-
+    server.cleanup(&server);
+    client.cleanup(&client);
     return 0;
 }

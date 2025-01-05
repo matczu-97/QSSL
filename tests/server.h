@@ -3,8 +3,6 @@
 #define SERVER_H
 #include "params.h"
 
-
-
 // Forward declare Server for use in function pointer types
 typedef struct Server Server;
 
@@ -40,9 +38,10 @@ struct Server {
     EC_KEY* ecc_public_key;  // For verification
     BOOL is_initialized;
     
-    unsigned char aes_key[AES_KEY_SIZE]; // later will be realized
+    // aes key to keep after discovered
+    unsigned char aes_key[AES_KEY_SIZE]; 
     size_t aes_key_len;
-
+    // decrypted data to decrypte 
     unsigned char decrypted_data[MAX_DATA_SIZE];
     size_t decrypted_len;
 
@@ -79,6 +78,8 @@ static void impl_cleanup_server(Server* server);
 // Constructor-like function
 BOOL server_init(Server* server);
 
+
+#ifdef SERVER_IMPLEMENTATION
 
 static BOOL impl_verify_signature(Server* server,
     unsigned char* encrypted_aes_key,
@@ -272,4 +273,5 @@ BOOL server_init(Server* server) {
     return TRUE;
 }
 
+#endif /* SERVER_IMPLEMENTATION */
 #endif /* SERVER_H */

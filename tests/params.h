@@ -1,4 +1,6 @@
 #pragma once
+#include <stdio.h>
+#include <string.h>
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -17,9 +19,16 @@
 typedef enum { FALSE = 0, TRUE = 1 } BOOL;
 
 #if defined(OPENSSL_VERSION)
+
+// declare once to allow implement server and client functions
+#define CLIENT_IMPLEMENTATION
+#define SERVER_IMPLEMENTATION
+
+
 #else /* OPENSSL_VERSION_NUMBER */
 #error "OpenSSL is required for this implementation"
 #endif /* OPENSSL_VERSION_NUMBER */
+
 
 
 static void handle_openssl_error() {

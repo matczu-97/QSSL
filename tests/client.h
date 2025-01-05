@@ -68,12 +68,13 @@ static BOOL impl_encrypt_data(Client* client,
     unsigned char* encrypted_data,
     size_t* encrypted_len);
 
-static void impl_cleanup(Client* client);
+static void impl_cleanup_client(Client* client);
 
 // Constructor-like function
 BOOL client_init(Client* client);
 
 
+#ifdef  CLIENT_IMPLEMENTATION
 
 static BOOL impl_sign_aes_key(Client* client,
     unsigned char* encrypted_aes_key,
@@ -219,4 +220,5 @@ BOOL client_init(Client* client, RSA** rsa_public_key, EC_KEY** ecc_private_key)
 }
 
 
+#endif //  CLIENT_IMPLEMENTATION
 #endif /* CLIENT_H */
