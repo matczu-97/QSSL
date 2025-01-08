@@ -11,6 +11,9 @@
 #include <openssl/obj_mac.h>
 #include <openssl/err.h>
 
+#include <oqs/oqs.h>
+
+
 #define AES_KEY_SIZE 32  // 256 bits
 #define AES_BLOCK_SIZE 16
 #define MAX_DATA_SIZE 1024
