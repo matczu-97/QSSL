@@ -27,7 +27,7 @@ typedef BOOL(*DecryptDataFunc)(Server* server,
     unsigned char* decrypted_data,
     size_t* decrypted_len);
 
-typedef void (*CleanupFunc)(Server* server);
+typedef void (*ServerCleanupFunc)(Server* server);
 
 // Server struct with embedded function pointers
 struct Server {
@@ -49,7 +49,7 @@ struct Server {
     VerifySignatureFunc verify_signature;
     DecryptAesKeyFunc decrypt_aes_key;
     DecryptDataFunc decrypt_data;
-    CleanupFunc cleanup;
+    ServerCleanupFunc cleanup;
 };
 
 // Function declarations for actual implementations

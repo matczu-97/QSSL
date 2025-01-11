@@ -268,7 +268,41 @@ set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_BINARY_DIR}/include/oqs/oqsconfig
 
 include_directories(${PROJECT_BINARY_DIR}/include)
 add_subdirectory(src)
+# -------------------------- open ssl ---------------------
 
+
+message("------------------ OPENSSL --------------------")
+
+message(${PROJECT_SOURCE_DIR})
+ set(OPENSSL_ROOT_DIR "${PROJECT_SOURCE_DIR}/OpenSSL-Win64/lib/VC/x64/MT")
+ set(OPENSSL_USE_STATIC_LIBS TRUE)
+ set(OPENSSL_MSVC_STATIC_RT TRUE)
+
+ 
+ set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/libcrypto.lib")
+ set(OPENSSL_SSL_LIBRARY "${OPENSSL_ROOT_DIR}/llibssl.lib")
+    
+
+ # Add these before find_package
+set(CMAKE_PREFIX_PATH "${OPENSSL_ROOT_DIR}")
+
+set(OPENSSL_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/OpenSSL-Win64/include")
+
+# Find OpenSSL package
+find_package(OpenSSL 3.4.0 REQUIRED)
+
+if(OPENSSL_FOUND)
+    add_definitions(-DHAVE_OPENSSL)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+endif()
+
+# Print OpenSSL details for debugging
+message(STATUS "OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
+message(STATUS "OpenSSL libraries: ${OPENSSL_LIBRARIES}")
+message(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
+
+
+# -------------------------- open ssl done ---------------------
 if(NOT ${OQS_BUILD_ONLY_LIB})
     add_subdirectory(tests)
 

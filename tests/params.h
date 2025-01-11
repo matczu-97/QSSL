@@ -13,6 +13,25 @@
 
 #include <oqs/oqs.h>
 
+/* Volatile pointer to prevent compiler optimization from removing the memset */
+static void* (* const volatile memset_secure)(void*, int, size_t) = memset;
+
+static void secure_memzero(void* ptr, size_t len) {
+    if (ptr == NULL) {
+        return;
+    }
+    /* Use volatile function pointer to prevent optimization */
+    memset_secure(ptr, 0, len);
+}
+
+/* Macro to safely clear AES key material */
+#define SAFE_AES_KEY_MEMSET(ptr) do { \
+    if ((ptr) != NULL) { \
+        secure_memzero((ptr), AES_KEY_SIZE); \
+    } \
+} while(0)
+
+
 
 #define AES_KEY_SIZE 32  // 256 bits
 #define AES_BLOCK_SIZE 16

@@ -43,37 +43,9 @@ endif()
 
 set(PYTHON3_EXEC python)
 
-#---------------OpenSLL----------------------------------
-
 # SIG API tests
 add_executable(example_sig example_sig.c)
 target_link_libraries(example_sig PRIVATE ${TEST_DEPS})
-
-
- set(OPENSSL_ROOT_DIR "C:/Program Files/OpenSSL-Win64/lib/VC/x64/MT")
- set(OPENSSL_USE_STATIC_LIBS TRUE)
- set(OPENSSL_MSVC_STATIC_RT TRUE)
-
- 
- set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/libcrypto.lib")
- set(OPENSSL_SSL_LIBRARY "${OPENSSL_ROOT_DIR}/llibssl.lib")
-    
-
- # Add these before find_package
-set(CMAKE_PREFIX_PATH "${OPENSSL_ROOT_DIR}")
-
-# Find OpenSSL package
-find_package(OpenSSL 3.4.0 REQUIRED)
-
-if(OPENSSL_FOUND)
-    add_definitions(-DHAVE_OPENSSL)
-    include_directories(${OPENSSL_INCLUDE_DIR})
-endif()
-
-# Print OpenSSL details for debugging
-message(STATUS "OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
-message(STATUS "OpenSSL libraries: ${OPENSSL_LIBRARIES}")
-message(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
 
 # KEM API tests
 add_executable(${PROJECT_NAME} 
@@ -92,7 +64,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 endif()
 
-#----------------OpenSLL Done----------------------------
 
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
     # With Visual studio the output of tests go into a folder with the configuration option. Force it to the same folder as if

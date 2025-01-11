@@ -28,7 +28,7 @@ typedef BOOL(*EncryptDataFunc)(Client* client,
     unsigned char* encrypted_data,
     size_t* encrypted_len);
 
-typedef void (*CleanupFunc)(Client* client);
+typedef void (*ClientCleanupFunc)(Client* client);
 
 // Client struct with embedded function pointers
 struct Client {
@@ -44,7 +44,7 @@ struct Client {
     SignAesKeyFunc sign_aes_key;
     EncryptAesKeyFunc encrypt_aes_key;
     EncryptDataFunc encrypt_data;
-    CleanupFunc cleanup;
+    ClientCleanupFunc cleanup;
 };
 
 // Function declarations for actual implementations
@@ -71,7 +71,7 @@ static BOOL impl_encrypt_data(Client* client,
 static void impl_cleanup_client(Client* client);
 
 // Constructor-like function
-BOOL client_init(Client* client);
+BOOL client_init(Client* client, RSA** rsa_public_key, EC_KEY** ecc_private_key);
 
 
 #ifdef  CLIENT_IMPLEMENTATION
@@ -176,18 +176,7 @@ static BOOL impl_encrypt_data(Client* client,
 
 static void impl_cleanup_client(Client* client) {
     if (!client) return;
-
-    if (client->rsa_public_key) {
-        RSA_free(client->rsa_public_key);
-        client->rsa_public_key = NULL;
-    }
-
-    if (client->ecc_private_key) {
-        EC_KEY_free(client->ecc_private_key);
-        client->ecc_private_key = NULL;
-    }
-
-    client->is_initialized = FALSE;
+    SAFE_AES_KEY_MEMSET(client->aes_key);
     EVP_cleanup();
     ERR_free_strings();
 }
