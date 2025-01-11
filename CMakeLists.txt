@@ -70,88 +70,6 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|AMD64")
     if(${OQS_DIST_BUILD})
         set(OQS_DIST_X86_64_BUILD ON)
     endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86|i586|i686")
-    set(ARCH "i586")
-    set(ARCH_X86 ON)
-    if(${OQS_DIST_BUILD})
-        set(OQS_DIST_X86_BUILD ON)
-    endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|arm64v8")
-    set(ARCH "arm64v8")
-    set(ARCH_ARM64v8 ON)
-    if(${OQS_DIST_BUILD})
-        set(OQS_DIST_ARM64_V8_BUILD ON)
-    endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "armel|armhf|armv7|arm32v7")
-    set(ARCH "arm32v7")
-    set(ARCH_ARM32v7 ON)
-    if(${OQS_DIST_BUILD})
-        set(OQS_DIST_ARM32_V7_BUILD ON)
-    endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "ppc64le|powerpc64le")
-    set(ARCH "ppc64le")
-    set(ARCH_PPC64LE ON)
-    if(${OQS_DIST_BUILD})
-        set(OQS_DIST_PPC64LE_BUILD ON)
-    endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(ppc64|powerpc64)")
-    message(WARNING "There is currently no CI for: " ${CMAKE_SYSTEM_PROCESSOR})
-    set(ARCH "ppc64")
-    set(ARCH_PPC64 ON)
-    if(${OQS_DIST_BUILD})
-        set(OQS_DIST_PPC64_BUILD ON)
-    endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(ppc|powerpc)")
-    message(WARNING "There is currently no CI for: " ${CMAKE_SYSTEM_PROCESSOR})
-    # CMake uses uname to derive CMAKE_SYSTEM_PROCESSOR value, so on Darwin
-    # the value is identical for ppc and ppc64. To have the right build arch
-    # in 64-bit case, we use CMAKE_OSX_ARCHITECTURES.
-    if(APPLE AND CMAKE_OSX_ARCHITECTURES STREQUAL "ppc64")
-        set(ARCH "ppc64")
-        set(ARCH_PPC64 ON)
-        if(${OQS_DIST_BUILD})
-            set(OQS_DIST_PPC64_BUILD ON)
-        endif()
-    else()
-        set(ARCH "ppc")
-        set(ARCH_PPC ON)
-        if(${OQS_DIST_BUILD})
-            set(OQS_DIST_PPC_BUILD ON)
-        endif()
-    endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "s390x")
-    set(ARCH "s390x")
-    set(ARCH_S390X ON)
-    if(${OQS_DIST_BUILD})
-        set(OQS_DIST_S390X_BUILD ON)
-    endif()
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv")
-    set(ARCH "riscv")
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "loongarch64")
-    set(ARCH "loongarch64")
-    set(ARCH_LOONGARCH64 ON)
-    if(${OQS_DIST_BUILD})
-        set(OQS_DIST_LOONGARCH64_BUILD ON)
-    endif()
-elseif(OQS_PERMIT_UNSUPPORTED_ARCHITECTURE)
-    message(WARNING "Unknown or unsupported processor: " ${CMAKE_SYSTEM_PROCESSOR})
-    message(WARNING "Compilation on an unsupported processor should only be used for testing, as it may result an insecure configuration, for example due to variable-time instructions leaking secret information.")
-else()
-    message(FATAL_ERROR "Unknown or unsupported processor: " ${CMAKE_SYSTEM_PROCESSOR} ". Override by setting OQS_PERMIT_UNSUPPORTED_ARCHITECTURE=ON")
-endif()
-
-if (NOT ((CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin") AND (ARCH_X86_64 STREQUAL "ON")) AND (OQS_LIBJADE_BUILD STREQUAL "ON"))
-    message(FATAL_ERROR "Building liboqs with libjade implementations from libjade is only supported on Linux and Darwin on x86_64.")
-endif()
-
-# intentionally don't switch to variables to avoid --warn-uninitialized report
-if(OQS_USE_CPU_EXTENSIONS)
-    message(FATAL_ERROR "OQS_USE_CPU_EXTENSIONS is deprecated")
-endif()
-
-# intentionally don't switch to variables to avoid --warn-uninitialized report
-if(OQS_PORTABLE_BUILD)
-    message(FATAL_ERROR "OQS_PORTABLE_BUILD is deprecated")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
@@ -169,32 +87,6 @@ endif()
 include(.CMake/compiler_opts.cmake)
 include(.CMake/alg_support.cmake)
 
-if(${OQS_USE_OPENSSL})
-    if(NOT DEFINED OPENSSL_ROOT_DIR)
-        if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Darwin")
-            if(EXISTS "/usr/local/opt/openssl@1.1")
-                set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl@1.1")
-            elseif(EXISTS "/opt/homebrew/opt/openssl@1.1")
-                set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
-            endif()
-        endif()
-    endif()
-    find_package(OpenSSL 1.1.1 REQUIRED)
-
-    if(OQS_DLOPEN_OPENSSL)
-      find_program(OBJDUMP objdump)
-      if(NOT OBJDUMP)
-	message(FATAL_ERROR "objdump not found. Please install it from binutils.")
-      endif()
-      execute_process(
-	COMMAND ${OBJDUMP} -p ${OPENSSL_CRYPTO_LIBRARY}
-	COMMAND sed -n "s/[ 	]\\{1,\\}SONAME[ 	]\\{1,\\}//p"
-	OUTPUT_VARIABLE OQS_OPENSSL_CRYPTO_SONAME
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-	COMMAND_ERROR_IS_FATAL ANY)
-      message(STATUS "OpenSSL dlopen SONAME: " ${OQS_OPENSSL_CRYPTO_SONAME})
-    endif()
-endif()
 
 set(PUBLIC_HEADERS ${PROJECT_SOURCE_DIR}/src/oqs.h
                    ${PROJECT_SOURCE_DIR}/src/common/aes/aes_ops.h
@@ -213,46 +105,15 @@ set(INTERNAL_HEADERS ${PROJECT_SOURCE_DIR}/src/common/aes/aes.h
                      ${PROJECT_SOURCE_DIR}/src/common/sha3/sha3.h
                      ${PROJECT_SOURCE_DIR}/src/common/sha3/sha3x4.h)
 
-if(${OQS_ENABLE_KEM_BIKE})
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/kem/bike/kem_bike.h)
-endif()
-if(${OQS_ENABLE_KEM_FRODOKEM})
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/kem/frodokem/kem_frodokem.h)
-endif()
-if(OQS_ENABLE_KEM_NTRUPRIME)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/kem/ntruprime/kem_ntruprime.h)
-endif()
-##### OQS_COPY_FROM_UPSTREAM_FRAGMENT_INCLUDE_HEADERS_START
-if(OQS_ENABLE_KEM_CLASSIC_MCELIECE)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/kem/classic_mceliece/kem_classic_mceliece.h)
-endif()
-if(OQS_ENABLE_KEM_HQC)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/kem/hqc/kem_hqc.h)
-endif()
+
 if(OQS_ENABLE_KEM_KYBER)
     set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/kem/kyber/kem_kyber.h)
 endif()
-if(OQS_ENABLE_KEM_ML_KEM)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/kem/ml_kem/kem_ml_kem.h)
-endif()
+
 if(OQS_ENABLE_SIG_DILITHIUM)
     set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/sig/dilithium/sig_dilithium.h)
 endif()
-if(OQS_ENABLE_SIG_ML_DSA)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/sig/ml_dsa/sig_ml_dsa.h)
-endif()
-if(OQS_ENABLE_SIG_FALCON)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/sig/falcon/sig_falcon.h)
-endif()
-if(OQS_ENABLE_SIG_SPHINCS)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/sig/sphincs/sig_sphincs.h)
-endif()
-if(OQS_ENABLE_SIG_MAYO)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/sig/mayo/sig_mayo.h)
-endif()
-if(OQS_ENABLE_SIG_CROSS)
-    set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/sig/cross/sig_cross.h)
-endif()
+
 ##### OQS_COPY_FROM_UPSTREAM_FRAGMENT_INCLUDE_HEADERS_END
 if(OQS_ENABLE_SIG_STFL_XMSS)
     set(PUBLIC_HEADERS ${PUBLIC_HEADERS} ${PROJECT_SOURCE_DIR}/src/sig_stfl/xmss/sig_stfl_xmss.h)
@@ -303,50 +164,8 @@ message(STATUS "OpenSSL version: ${OPENSSL_VERSION}")
 
 
 # -------------------------- open ssl done ---------------------
+
 if(NOT ${OQS_BUILD_ONLY_LIB})
     add_subdirectory(tests)
-
-    if (NOT CYGWIN)
-      find_package(Doxygen)
-      if(DOXYGEN_FOUND)
-        set(DOXYFILE ${PROJECT_SOURCE_DIR}/docs/.Doxyfile)
-        add_custom_target(
-            gen_docs
-            COMMAND ${PROJECT_SOURCE_DIR}/scripts/run_doxygen.sh ${DOXYGEN_EXECUTABLE} ${DOXYFILE} ${PROJECT_BINARY_DIR}
-            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-            COMMENT "Generate API documentation with Doxygen."
-            USES_TERMINAL)
-      endif()
-    endif()
-
-    if(NOT WIN32)
-        add_custom_target(
-            prettyprint
-            COMMAND find src tests -name '*.[ch]' | grep -v '/external/' | grep -v 'kem.*/pqclean_' | grep -v 'sig.*/pqclean_' | xargs astyle --options=.astylerc
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            USES_TERMINAL)
-    endif()
-endif()
-set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_VENDOR "www.openquantumsafe.org")
-set(CPACK_PACKAGE_VERSION ${OQS_VERSION_TEXT})
-if(${OQS_USE_OPENSSL})
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, openssl")
-else()
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
-endif()
-
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "www.openquantumsafe.org")
-include(CPack)
-
-# uninstall target
-if(NOT TARGET uninstall)
-  configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/.CMake/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
-
-  add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
