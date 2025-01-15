@@ -51,7 +51,7 @@ target_link_libraries(example_sig PRIVATE ${TEST_DEPS})
 add_executable(${PROJECT_NAME} 
     example_kem.c
     tls.c
-    server.h params.h client.h)
+    server.h params.h client.h "crypto_functions.h" "crypto_functions.c" "client.c" "server.c")
 target_link_libraries(${PROJECT_NAME} PRIVATE ${TEST_DEPS})
 
 if(OPENSSL_FOUND)

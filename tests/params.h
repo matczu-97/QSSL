@@ -1,6 +1,10 @@
 #pragma once
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib") // Link with Winsock library
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -31,14 +35,10 @@ static void secure_memzero(void* ptr, size_t len) {
     } \
 } while(0)
 
-
-
 #define AES_KEY_SIZE 32  // 256 bits
 #define AES_BLOCK_SIZE 16
 #define MAX_DATA_SIZE 1024
 #define RSA_KEY_SIZE 2048
-
-typedef enum { FALSE = 0, TRUE = 1 } BOOL;
 
 #if defined(OPENSSL_VERSION)
 
@@ -50,8 +50,6 @@ typedef enum { FALSE = 0, TRUE = 1 } BOOL;
 #else /* OPENSSL_VERSION_NUMBER */
 #error "OpenSSL is required for this implementation"
 #endif /* OPENSSL_VERSION_NUMBER */
-
-
 
 static void handle_openssl_error() {
     exit(1);
