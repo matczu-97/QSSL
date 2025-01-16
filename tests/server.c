@@ -1,48 +1,5 @@
 #include "server.h"
 
-// Generate RSA key pair
-void generate_rsa_keys(RSA** rsa_private_key, RSA** rsa_public_key) {
-    BIGNUM* bn = BN_new();
-    if (!BN_set_word(bn, RSA_F4)) {
-        handle_openssl_error();
-    }
-
-    *rsa_private_key = RSA_new();
-    if (!RSA_generate_key_ex(*rsa_private_key, RSA_KEY_SIZE, bn, NULL)) {
-        handle_openssl_error();
-    }
-
-    // Extract public key
-    *rsa_public_key = RSAPublicKey_dup(*rsa_private_key);
-    if (*rsa_public_key == NULL) {
-        handle_openssl_error();
-    }
-
-    BN_free(bn);
-}
-
-// Generate ECC key pair
-void generate_ecc_keys(EC_KEY** ecc_private_key, EC_KEY** ecc_public_key) {
-    *ecc_private_key = EC_KEY_new_by_curve_name(NID_secp256k1);
-    if (!*ecc_private_key) {
-        handle_openssl_error();
-    }
-
-    if (!EC_KEY_generate_key(*ecc_private_key)) {
-        handle_openssl_error();
-    }
-
-    *ecc_public_key = EC_KEY_new_by_curve_name(NID_secp256k1);
-    if (!*ecc_public_key) {
-        handle_openssl_error();
-    }
-
-    const EC_POINT* pub_key = EC_KEY_get0_public_key(*ecc_private_key);
-    if (!EC_KEY_set_public_key(*ecc_public_key, pub_key)) {
-        handle_openssl_error();
-    }
-}
-
 void server_cleanup(Server* server)
 {
     if (!server) return;
@@ -67,6 +24,14 @@ void server_cleanup(Server* server)
         server->ecc_public_key = NULL;
     }
 
+    if (server->kyber_private_key) {
+        OQS_MEM_cleanse(server->kyber_private_key, OQS_KEM_kyber_768_length_secret_key);
+    }
+
+    if (server->kyber_shared_secret) {
+        OQS_MEM_cleanse(server->kyber_shared_secret, OQS_KEM_kyber_768_length_shared_secret);
+    }
+
     server->is_initialized = FALSE;
     EVP_cleanup();
     ERR_free_strings();
@@ -84,6 +49,13 @@ int server_init(Server* server)
 
     generate_rsa_keys(&server->rsa_private_key, &server->rsa_public_key);
     generate_ecc_keys(&server->ecc_private_key, &server->ecc_public_key);
+   int rc = generate_kyber_keys(&server->kyber_private_key, &server->kyber_public_key);
+   if (rc != 0)
+   {
+       printf("kyber keys generation failed!");
+       server_cleanup(server);
+       return FALSE;
+   }
 
     // Initialize function pointers
     server->cleanup = server_cleanup;
@@ -92,12 +64,21 @@ int server_init(Server* server)
     return TRUE;
 }
 
-int server_run() {
+int main() {
     WSADATA wsaData;
-    int server_fd;
+    int server_fd, rc;
     struct sockaddr_in server_addr, client_addr;
     char buffer[BUFFER_SIZE];
     socklen_t client_addr_len = sizeof(client_addr);
+    
+    Server server;
+    rc = server_init(&server);
+    if (rc != TRUE)
+    {
+        printf("server init failed!, exiting...");
+        return;
+    }
+
 
     // Initialize Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {

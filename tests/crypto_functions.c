@@ -118,8 +118,8 @@
      return TRUE;
  }
 
-BOOL aes_decrypt(unsigned char* dec_key, unsigned char* ciphertext, size_t cipher_len, unsigned char* iv,
-    unsigned char* plaintext, size_t* plaintext_len) 
+ BOOL aes_decrypt(unsigned char* dec_key, unsigned char* ciphertext, size_t cipher_len, unsigned char* iv,
+     unsigned char* plaintext, size_t* plaintext_len) 
 {
     AES_KEY aes;
     if (AES_set_decrypt_key(dec_key, AES_KEY_SIZE * 8, &aes) < 0) {
@@ -139,4 +139,100 @@ BOOL aes_decrypt(unsigned char* dec_key, unsigned char* ciphertext, size_t ciphe
     *plaintext_len = cipher_len - padding_len;
 
     return TRUE;
+}
+
+// Generate RSA key pair
+void generate_rsa_keys(RSA** rsa_private_key, RSA** rsa_public_key) {
+    BIGNUM* bn = BN_new();
+    if (!BN_set_word(bn, RSA_F4)) {
+        handle_openssl_error();
+    }
+
+    *rsa_private_key = RSA_new();
+    if (!RSA_generate_key_ex(*rsa_private_key, RSA_KEY_SIZE, bn, NULL)) {
+        handle_openssl_error();
+    }
+
+    // Extract public key
+    *rsa_public_key = RSAPublicKey_dup(*rsa_private_key);
+    if (*rsa_public_key == NULL) {
+        handle_openssl_error();
+    }
+
+    BN_free(bn);
+}
+
+// Generate ECC key pair
+void generate_ecc_keys(EC_KEY** ecc_private_key, EC_KEY** ecc_public_key) {
+    *ecc_private_key = EC_KEY_new_by_curve_name(NID_secp256k1);
+    if (!*ecc_private_key) {
+        handle_openssl_error();
+    }
+
+    if (!EC_KEY_generate_key(*ecc_private_key)) {
+        handle_openssl_error();
+    }
+
+    *ecc_public_key = EC_KEY_new_by_curve_name(NID_secp256k1);
+    if (!*ecc_public_key) {
+        handle_openssl_error();
+    }
+
+    const EC_POINT* pub_key = EC_KEY_get0_public_key(*ecc_private_key);
+    if (!EC_KEY_set_public_key(*ecc_public_key, pub_key)) {
+        handle_openssl_error();
+    }
+}
+
+// Generate Kyber key pair
+int generate_kyber_keys(uint8_t* kyber_secret_key, uint8_t* kyber_public_key)
+{
+#ifndef OQS_ENABLE_KEM_kyber_768 // if Kyber-768 was not enabled at compile-time
+    printf("[generate_kyber_keys] OQS_KEM_kyber_768 was not enabled at "
+        "compile-time.\n");
+    return -1; // nothing done successfully ;-)
+#else
+    OQS_STATUS rc = OQS_KEM_kyber_768_keypair(kyber_public_key, kyber_secret_key);
+    if (rc != OQS_SUCCESS) {
+        fprintf(stderr, "ERROR: OQS_KEM_kyber_768_keypair failed!\n");
+        OQS_MEM_cleanse(kyber_secret_key, OQS_KEM_kyber_768_length_secret_key);
+        return -1;
+    }
+    return 0;
+#endif
+}
+
+// Encapsulate given public key and create shared secret and encapsulated data
+int kyber_encapsulate(uint8_t* encapsulated_data, uint8_t* shared_secret, uint8_t* kyber_public_key) {
+#ifndef OQS_ENABLE_KEM_kyber_768 // if Kyber-768 was not enabled at compile-time
+    printf("[kyber_encapsulate] OQS_KEM_kyber_768 was not enabled at "
+        "compile-time.\n");
+    return -1; // nothing done successfully ;-)
+#else
+    OQS_STATUS rc = OQS_KEM_kyber_768_encaps(encapsulated_data, shared_secret, kyber_public_key);
+    if (rc != OQS_SUCCESS) {
+        fprintf(stderr, "ERROR: OQS_KEM_kyber_768_encaps failed!\n");
+        OQS_MEM_cleanse(shared_secret, OQS_KEM_kyber_768_length_shared_secret);
+        return -1;
+    }
+    return 0;
+#endif
+}
+
+// Decapsulate given ciphertext/encapsulated_data and finding the shared secret using the secret_key
+int kyber_decapsulate(uint8_t* encapsulated_data, uint8_t* shared_secret, uint8_t* kyber_secret_key) {
+#ifndef OQS_ENABLE_KEM_kyber_768 // if Kyber-768 was not enabled at compile-time
+    printf("[kyber_decapsulate] OQS_KEM_kyber_768 was not enabled at "
+        "compile-time.\n");
+    return -1; // nothing done successfully ;-)
+#else
+    OQS_STATUS rc = OQS_KEM_kyber_768_decaps(shared_secret, encapsulated_data, kyber_secret_key);
+    if (rc != OQS_SUCCESS) {
+        fprintf(stderr, "ERROR: OQS_KEM_kyber_768_decaps failed!\n");
+        OQS_MEM_cleanse(kyber_secret_key, OQS_KEM_kyber_768_length_secret_key);
+        OQS_MEM_cleanse(shared_secret, OQS_KEM_kyber_768_length_shared_secret);
+        return -1;
+    }
+    return 0;
+#endif
 }
