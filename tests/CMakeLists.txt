@@ -48,15 +48,23 @@ add_executable(example_sig example_sig.c)
 target_link_libraries(example_sig PRIVATE ${TEST_DEPS})
 
 # KEM API tests
-add_executable(${PROJECT_NAME} 
-    example_kem.c
-    tls.c
-    server.h params.h client.h "crypto_functions.h" "crypto_functions.c" "client.c" "server.c" "socket_functions.h" "socket_functions.c")
-target_link_libraries(${PROJECT_NAME} PRIVATE ${TEST_DEPS})
+add_executable(server server.c crypto_functions.c socket_functions.c)
+target_include_directories(server PRIVATE .)
+target_link_libraries(server PRIVATE ${TEST_DEPS})
+
+add_executable(client client.c crypto_functions.c socket_functions.c)
+target_include_directories(client PRIVATE .)
+target_link_libraries(client PRIVATE ${TEST_DEPS})
 
 if(OPENSSL_FOUND)
 # Link libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(server PRIVATE
+    ${OPENSSL_LIBRARIES}
+    # For Windows, you might also need these
+    crypt32
+    ws2_32
+)
+target_link_libraries(client PRIVATE
     ${OPENSSL_LIBRARIES}
     # For Windows, you might also need these
     crypt32

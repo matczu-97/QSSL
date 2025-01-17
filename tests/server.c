@@ -52,7 +52,7 @@ int server_init(Server* server)
     }
 
     int rc = generate_rsa_keys(&server->rsa_private_key, &server->rsa_public_key);
-    if (rc != 0)
+    if (rc != TRUE)
     {
         printf("rsa keys generation failed!");
         server_cleanup(server);
@@ -60,7 +60,7 @@ int server_init(Server* server)
     }
 
     rc = generate_ecc_keys(&server->ecc_private_key, &server->ecc_public_key);
-    if (rc != 0)
+    if (rc != TRUE)
     {
         printf("ecc keys generation failed!");
         server_cleanup(server);
@@ -68,7 +68,7 @@ int server_init(Server* server)
     }
    
     rc = generate_kyber_keys(&server->kyber_private_key, &server->kyber_public_key);
-    if (rc != 0)
+    if (rc != TRUE)
     {
         printf("kyber keys generation failed!");
         server_cleanup(server);
@@ -76,7 +76,7 @@ int server_init(Server* server)
     } 
 
     rc = generate_dilithium_keys(&server->dilithium_private_key, &server->dilithium_public_key);
-    if (rc != 0)
+    if (rc != TRUE)
     {
         printf("dilithium keys generation failed!");
         server_cleanup(server);
@@ -103,10 +103,9 @@ int tls_server(Server* server,Client_Keys* cl_keys, int server_fd, struct sockad
         printf("failed to serilaze rsa key!\n");
         return FALSE;
     }
-
     // Send the RSA Key
     char* message_to_send = "RSA Key";
-    send_and_receive(server_fd, client_addr, message_to_send,sizeof(message_to_send));
+    send_and_receive(server_fd, client_addr, message_to_send,strlen(message_to_send));
     send_and_receive(server_fd, client_addr, serialized_key, key_len);
 
     // Serialize ECC public key
@@ -116,33 +115,27 @@ int tls_server(Server* server,Client_Keys* cl_keys, int server_fd, struct sockad
         printf("failed to serilaze ecc key!\n");
         return FALSE;
     }
-
     // Send the ECC Key
     message_to_send = "ECC Key";
-    send_and_receive(server_fd, client_addr, message_to_send, sizeof(message_to_send));
+    send_and_receive(server_fd, client_addr, message_to_send, strlen(message_to_send));
     send_and_receive(server_fd, client_addr, serialized_key, key_len);
 
     // Send the Kyber Key
     message_to_send = "Kyber Key";
-    send_and_receive(server_fd, client_addr, message_to_send, sizeof(message_to_send));
+    send_and_receive(server_fd, client_addr, message_to_send, strlen(message_to_send));
     send_and_receive(server_fd, client_addr, server->kyber_public_key, OQS_KEM_kyber_768_length_secret_key);
 
     // Send the Dilithium Key
     message_to_send = "Dilithium Key";
-    send_and_receive(server_fd, client_addr, message_to_send, sizeof(message_to_send));
+    send_and_receive(server_fd, client_addr, message_to_send, strlen(message_to_send));
     send_and_receive(server_fd, client_addr, server->dilithium_public_key, OQS_SIG_dilithium_2_length_public_key);
 
     printf("all public keys sent successfully\n");
     
     // Recieve the ECC Key
     char* client_message = NULL;
-    key_len = 0;
+    print_header_and_free(server_fd, client_addr, &client_message, &key_len);
     receive_and_send(server_fd, client_addr, &client_message, &key_len);
-    printf("%s:\n", client_message);
-    client_message = NULL;
-    key_len = 0;
-    receive_and_send(server_fd, client_addr, &client_message, &key_len);
-    
     if (client_message) {
         cl_keys->ecc_public_key = deserialize_ecc_key(client_message, key_len);
         if (cl_keys->ecc_public_key) {
@@ -156,11 +149,7 @@ int tls_server(Server* server,Client_Keys* cl_keys, int server_fd, struct sockad
 
     // Recieve the Dilithium Key
     client_message = NULL;
-    key_len = 0;
-    receive_and_send(server_fd, client_addr, &client_message, &key_len);
-    printf("%s:\n", client_message);
-    client_message = NULL;
-    key_len = 0;
+    print_header_and_free(server_fd, client_addr, &client_message, &key_len);
     receive_and_send(server_fd, client_addr, &client_message, &key_len);
     
     if (key_len == OQS_SIG_dilithium_2_length_public_key) {
@@ -241,11 +230,12 @@ int main() {
 
 
     // Send response to client
-    const char* response = "Message received";
-    sendto(server_fd, response, strlen(response), 0, (const struct sockaddr*)&client_addr, client_addr_len);
+    //const char* response = "Message received";
+    //sendto(server_fd, response, strlen(response), 0, (const struct sockaddr*)&client_addr, client_addr_len);
 
     // Cleanup
-    close(server_fd);
+    closesocket(server_fd);
     WSACleanup();
+    system("PAUSE");
     return 0;
 }

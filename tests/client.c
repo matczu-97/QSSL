@@ -36,7 +36,7 @@ int client_init(Client* client)
     }
 
     int rc = generate_aes_key(client->aes_key, AES_KEY_SIZE);
-    if (rc != 0)
+    if (rc != TRUE)
     {
         printf("aes keys generation failed!");
         client_cleanup(client);
@@ -44,7 +44,7 @@ int client_init(Client* client)
     }
     
     rc = generate_ecc_keys(&client->ecc_private_key, &client->ecc_public_key);
-    if (rc != 0)
+    if (rc != TRUE)
     {
         printf("ecc keys generation failed!");
         client_cleanup(client);
@@ -52,7 +52,7 @@ int client_init(Client* client)
     }
 
     rc = generate_dilithium_keys(&client->dilithium_private_key, &client->dilithium_public_key);
-    if (rc != 0)
+    if (rc != TRUE)
     {
         printf("dilithium keys generation failed!");
         client_cleanup(client);
@@ -72,16 +72,13 @@ int tls_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sock
     char* server_message = NULL;
     
     // Recieve the RSA Key
-    receive_and_send(client_fd, server_addr, &server_message, &key_len);
-    printf("%s:\n", server_message);
-    server_message = NULL;
-    key_len = 0;
+    print_header_and_free(client_fd, server_addr, &server_message, &key_len);
     receive_and_send(client_fd, server_addr, &server_message, &key_len);
     if (server_message) {
         // Deserialize the public key
         ser_keys->rsa_public_key = deserialize_rsa_key(server_message, key_len);
         if (ser_keys->rsa_public_key) {
-            printf("ECC public key successfully deserialized!\n");
+            printf("RSA public key successfully deserialized!\n");
         }
         else {
             fprintf(stderr, "Failed to deserialize RSA public key\n");
@@ -90,12 +87,7 @@ int tls_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sock
     }
     
     // Recieve the ECC Key
-    server_message = NULL;
-    key_len = 0;
-    receive_and_send(client_fd, server_addr, &server_message, &key_len);
-    printf("%s:\n", server_message);
-    server_message = NULL;
-    key_len = 0;
+    print_header_and_free(client_fd, server_addr, &server_message, &key_len);
     receive_and_send(client_fd, server_addr, &server_message, &key_len);
     if (server_message) {
         ser_keys->ecc_public_key = deserialize_ecc_key(server_message, key_len);
@@ -109,12 +101,7 @@ int tls_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sock
     }
     
     // Recieve the Kyber Key
-    server_message = NULL;
-    key_len = 0;
-    receive_and_send(client_fd, server_addr, &server_message, &key_len);
-    printf("%s:\n", server_message);
-    server_message = NULL;
-    key_len = 0;
+    print_header_and_free(client_fd, server_addr, &server_message, &key_len);
     receive_and_send(client_fd, server_addr, &server_message, &key_len);
     if (key_len == OQS_KEM_kyber_768_length_secret_key) {
         // saving the key in the cl_keys struct
@@ -127,14 +114,8 @@ int tls_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sock
     }
 
     // Recieve the Dilithium Key
-    server_message = NULL;
-    key_len = 0;
+    print_header_and_free(client_fd, server_addr, &server_message, &key_len);
     receive_and_send(client_fd, server_addr, &server_message, &key_len);
-    printf("%s:\n", server_message);
-    server_message = NULL;
-    key_len = 0;
-    receive_and_send(client_fd, server_addr, &server_message, &key_len);
-
     if (key_len == OQS_SIG_dilithium_2_length_public_key) {
         // saving the key in the cl_keys struct
         memcpy(ser_keys->dilithium_public_key, server_message, key_len);
@@ -156,28 +137,34 @@ int tls_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sock
         printf("failed to serilaze ecc key!\n");
         return FALSE;
     }
-
     // Send the ECC Key
     char* message_to_send = "ECC Key";
-    send_and_receive(client_fd, server_addr, message_to_send, sizeof(message_to_send));
+    send_and_receive(client_fd, server_addr, message_to_send, strlen(message_to_send));
     send_and_receive(client_fd, server_addr, serialized_key, key_len);
 
     // Send the Dilithium Key
     message_to_send = "Dilithium Key";
-    send_and_receive(client_fd, server_addr, message_to_send, sizeof(message_to_send));
+    send_and_receive(client_fd, server_addr, message_to_send, strlen(message_to_send));
     send_and_receive(client_fd, server_addr, client->dilithium_public_key, OQS_SIG_dilithium_2_length_public_key);
 
     printf("all public keys sent successfully\n");
     return TRUE;
 }
 
-int client_run() {
+int main() {
     WSADATA wsaData;
     int client_fd, rc;
     struct sockaddr_in server_addr;
     char buffer[BUFFER_SIZE];
     Server_Keys sk;
     Client client;
+
+    rc = client_init(&client);
+    if (rc != TRUE)
+    {
+        printf("client init failed!, exiting...");
+        return;
+    }
 
     // Initialize Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -196,7 +183,7 @@ int client_run() {
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(PORT);
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_addr.s_addr = inet_addr(LOCALHOST);
 
     // Send message to server
     const char* message = "Hello, Server!";
@@ -209,6 +196,7 @@ int client_run() {
         return;
     }
 
+    /* here need to add the encryption process*/
 
     // Receive response from server
    /* int server_addr_len = sizeof(server_addr);
@@ -225,5 +213,6 @@ int client_run() {
     // Cleanup
     closesocket(client_fd);
     WSACleanup();
+    system("PAUSE");
     return 0;
 }

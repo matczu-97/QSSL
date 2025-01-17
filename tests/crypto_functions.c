@@ -319,15 +319,15 @@ int generate_kyber_keys(uint8_t* kyber_secret_key, uint8_t* kyber_public_key)
 #ifndef OQS_ENABLE_KEM_kyber_768 // if Kyber-768 was not enabled at compile-time
     printf("[generate_kyber_keys] OQS_KEM_kyber_768 was not enabled at "
         "compile-time.\n");
-    return -1; // nothing done successfully ;-)
+    return FALSE; // nothing done successfully ;-)
 #else
     OQS_STATUS rc = OQS_KEM_kyber_768_keypair(kyber_public_key, kyber_secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_KEM_kyber_768_keypair failed!\n");
         OQS_MEM_cleanse(kyber_secret_key, OQS_KEM_kyber_768_length_secret_key);
-        return -1;
+        return FALSE;
     }
-    return 0;
+    return TRUE;
 #endif
 }
 
@@ -336,15 +336,15 @@ int kyber_encapsulate(uint8_t* encapsulated_data, uint8_t* shared_secret, uint8_
 #ifndef OQS_ENABLE_KEM_kyber_768 // if Kyber-768 was not enabled at compile-time
     printf("[kyber_encapsulate] OQS_KEM_kyber_768 was not enabled at "
         "compile-time.\n");
-    return -1; // nothing done successfully ;-)
+    return FALSE; // nothing done successfully ;-)
 #else
     OQS_STATUS rc = OQS_KEM_kyber_768_encaps(encapsulated_data, shared_secret, kyber_public_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_KEM_kyber_768_encaps failed!\n");
         OQS_MEM_cleanse(shared_secret, OQS_KEM_kyber_768_length_shared_secret);
-        return -1;
+        return FALSE;
     }
-    return 0;
+    return TRUE;
 #endif
 }
 
@@ -353,16 +353,16 @@ int kyber_decapsulate(uint8_t* encapsulated_data, uint8_t* shared_secret, uint8_
 #ifndef OQS_ENABLE_KEM_kyber_768 // if Kyber-768 was not enabled at compile-time
     printf("[kyber_decapsulate] OQS_KEM_kyber_768 was not enabled at "
         "compile-time.\n");
-    return -1; // nothing done successfully ;-)
+    return FALSE; // nothing done successfully ;-)
 #else
     OQS_STATUS rc = OQS_KEM_kyber_768_decaps(shared_secret, encapsulated_data, kyber_secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_KEM_kyber_768_decaps failed!\n");
         OQS_MEM_cleanse(kyber_secret_key, OQS_KEM_kyber_768_length_secret_key);
         OQS_MEM_cleanse(shared_secret, OQS_KEM_kyber_768_length_shared_secret);
-        return -1;
+        return FALSE;
     }
-    return 0;
+    return TRUE;
 #endif
 }
 
@@ -376,9 +376,9 @@ int generate_dilithium_keys(uint8_t* dilithium_secret_key, uint8_t* dilithium_pu
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_keypair failed!\n");
         OQS_MEM_cleanse(dilithium_secret_key, OQS_SIG_dilithium_2_length_secret_key);
-        return -1;
+        return FALSE;
     }
-    return 0;
+    return TRUE;
 }
 
 // Sign message using Dilithium 
@@ -387,9 +387,9 @@ int dilithium_sign(uint8_t* dilithium_secret_key, uint8_t* message_to_sign, size
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_sign failed!\n");
         OQS_MEM_cleanse(dilithium_secret_key, OQS_SIG_dilithium_2_length_secret_key);
-        return -1;
+        return FALSE;
     }
-    return 0;
+    return TRUE;
 }
 
 // Verify message using Dilithium 
@@ -397,9 +397,9 @@ int dilithium_verify(uint8_t* dilithium_public_key, uint8_t* message_to_verify, 
     OQS_STATUS rc = OQS_SIG_dilithium_2_verify(message_to_verify, &message_len, signature, signature_len, dilithium_public_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_verify failed!\n");
-        return -1;
+        return FALSE;
     }
-    return 0;
+    return TRUE;
 }
 
 #pragma endregion

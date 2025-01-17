@@ -2,8 +2,6 @@
 #include "crypto_functions.h"
 #include "socket_functions.h"
 
-#define PORT 8080
-
 // Forward declarations of structs
 typedef struct Server Server;
 
