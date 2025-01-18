@@ -74,8 +74,10 @@ int kyber_decapsulate(uint8_t* encapsulated_data, uint8_t* shared_secret, uint8_
 
 int generate_dilithium_keys(uint8_t* dilithium_secret_key, uint8_t* dilithium_public_key);
 
-int dilithium_sign(uint8_t* dilithium_secret_key, uint8_t* message_to_sign, size_t message_len, uint8_t* signature, size_t signature_len);
+int dilithium_sign(uint8_t* dilithium_secret_key, uint8_t* message_to_sign, size_t message_len, uint8_t* signature, size_t* signature_len);
 
 int dilithium_verify(uint8_t* dilithium_public_key, uint8_t* message_to_verify, size_t message_len, uint8_t* signature, size_t signature_len);
 
 #pragma endregion
+
+void xor(const unsigned char* first, const unsigned char* second, unsigned char* result, size_t size);

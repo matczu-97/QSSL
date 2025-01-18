@@ -382,8 +382,8 @@ int generate_dilithium_keys(uint8_t* dilithium_secret_key, uint8_t* dilithium_pu
 }
 
 // Sign message using Dilithium 
-int dilithium_sign(uint8_t* dilithium_secret_key, uint8_t* message_to_sign, size_t message_len, uint8_t* signature, size_t signature_len) {
-    OQS_STATUS rc = OQS_SIG_dilithium_2_sign(signature, &signature_len, message_to_sign, message_len, dilithium_secret_key);
+int dilithium_sign(uint8_t* dilithium_secret_key, uint8_t* message_to_sign, size_t message_len, uint8_t* signature, size_t* signature_len) {
+    OQS_STATUS rc = OQS_SIG_dilithium_2_sign(signature, signature_len, message_to_sign, message_len, dilithium_secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_sign failed!\n");
         OQS_MEM_cleanse(dilithium_secret_key, OQS_SIG_dilithium_2_length_secret_key);
@@ -394,7 +394,7 @@ int dilithium_sign(uint8_t* dilithium_secret_key, uint8_t* message_to_sign, size
 
 // Verify message using Dilithium 
 int dilithium_verify(uint8_t* dilithium_public_key, uint8_t* message_to_verify, size_t message_len, uint8_t* signature, size_t signature_len) {
-    OQS_STATUS rc = OQS_SIG_dilithium_2_verify(message_to_verify, &message_len, signature, signature_len, dilithium_public_key);
+    OQS_STATUS rc = OQS_SIG_dilithium_2_verify(message_to_verify, message_len, signature, signature_len, dilithium_public_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: OQS_SIG_dilithium_2_verify failed!\n");
         return FALSE;
@@ -403,3 +403,9 @@ int dilithium_verify(uint8_t* dilithium_public_key, uint8_t* message_to_verify, 
 }
 
 #pragma endregion
+
+void xor(const unsigned char* first, const unsigned char* second, unsigned char* result, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        result[i] = first[i] ^ second[i];
+    }
+}

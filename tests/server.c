@@ -90,7 +90,7 @@ int server_init(Server* server)
     return TRUE;
 }
 
-int tls_server(Server* server,Client_Keys* cl_keys, int server_fd, struct sockaddr_in client_addr)
+int public_key_exchange_server(Server* server,Client_Keys* cl_keys, int server_fd, struct sockaddr_in client_addr)
 {
     size_t key_len;
     char* serialized_key = NULL;
@@ -166,11 +166,98 @@ int tls_server(Server* server,Client_Keys* cl_keys, int server_fd, struct sockad
     return TRUE;
 }
 
+int handshake_server(Server* server, Client_Keys* cl_keys, int server_fd, struct sockaddr_in client_addr, unsigned char* session_key)
+{
+    int rc , errCode = 0;
+    unsigned int ecc_signature_len = 0;
+    unsigned char* encrypted_key = NULL, *signature = NULL;
+    unsigned char  decrypted_key[RSA_KEY_SIZE / 8];
+    uint8_t* encapsulated_message = NULL, shared_secret[OQS_KEM_kyber_768_length_shared_secret];
+    size_t encrypted_len = 0, message_len = 0, decrypted_len = 0, encapsulated_len = 0, dil_sign_len = 0, ecc_sign_len_size_t = 0;
+
+    // Recieve the AES Key with RSA encryption
+    char* client_message = NULL;
+    print_header_and_free(server_fd, client_addr, &client_message, &message_len);
+    receive_and_send(server_fd, client_addr, &encrypted_key, &encrypted_len);
+    if (!encrypted_key) 
+    {
+            fprintf(stderr, "Failed to get encrypted key from client\n");
+    }
+    // Recieve the ECC Signature
+    client_message = NULL;
+    print_header_and_free(server_fd, client_addr, &client_message, &message_len);
+    receive_and_send(server_fd, client_addr, &signature, &ecc_sign_len_size_t);
+    if (!signature)
+    {
+        fprintf(stderr, "Failed to get encrypted key signature from client\n");
+    }
+
+    ecc_signature_len = (unsigned int)ecc_sign_len_size_t;
+    // Verify ECC signature
+    rc = ecc_verify(cl_keys->ecc_public_key, encrypted_key, encrypted_len, signature, ecc_signature_len);
+    if (rc != TRUE) {
+        printf("failed to verify the message using ECC!\n");
+        errCode = -1;
+    }
+    else {// if we fail to verify there is no need to decrypt the message
+        rc = rsa_decrypt(server->rsa_private_key, encrypted_key, encrypted_len, decrypted_key, &decrypted_len);
+        if (rc != TRUE) {
+            printf("failed to decrypt RSA !\n");
+            errCode = -2;
+        }
+    }
+
+
+    // Recieve the Kyber shared secret
+    client_message = NULL;
+    print_header_and_free(server_fd, client_addr, &client_message, &message_len);
+    receive_and_send(server_fd, client_addr, &encapsulated_message, &encapsulated_len);
+    if (!encapsulated_message)
+    {
+        fprintf(stderr, "Failed to get encapsulated message from client\n");
+    }
+    // Recieve the Dilithium Signature
+    client_message = NULL;
+    print_header_and_free(server_fd, client_addr, &client_message, &message_len);
+    receive_and_send(server_fd, client_addr, &signature, &dil_sign_len);
+    if (!signature)
+    {
+        fprintf(stderr, "Failed to get encapsulated message signature from client\n");
+    }
+
+    // Verify Dilithium signature
+    rc = dilithium_verify(cl_keys->dilithium_public_key, encapsulated_message, encapsulated_len, signature, dil_sign_len);
+    if (rc != TRUE) {
+        printf("failed to verify the message using Dilithium!\n");
+        errCode = -3;
+    }
+    else {// if we fail to verify there is no need to decapsulate the message
+        rc = kyber_decapsulate(encapsulated_message, shared_secret,server->kyber_private_key);
+        if (rc != TRUE) {
+            printf("failed to decpasulate Kyber !\n");
+            errCode = -4;
+        }
+    }
+
+    if (errCode < 0)
+    {
+        printf("transfer of session key failed with error code - %d", errCode);
+        return TRUE;
+    }
+
+    printf("transfer of session key completed\n");
+    // create the session key using xor between both keys
+    xor (decrypted_key, shared_secret, session_key, AES_KEY_SIZE);
+    printf("Session key is Ready to use\n");
+
+    return TRUE;
+}
+
 int main() {
     WSADATA wsaData;
     int server_fd, rc;
     struct sockaddr_in server_addr, client_addr;
-    char buffer[BUFFER_SIZE];
+    unsigned char buffer[BUFFER_SIZE], session_key[AES_KEY_SIZE];
     socklen_t client_addr_len = sizeof(client_addr);
     Client_Keys ck;
     Server server;
@@ -219,14 +306,20 @@ int main() {
     printf("Client: %s\n", buffer);
 
     // start tls handshake
-    rc = tls_server(&server,&ck, server_fd, client_addr);
+    rc = public_key_exchange_server(&server,&ck, server_fd, client_addr);
     if (rc != TRUE)
     {
         printf("tls_server failed!, exiting...");
         return;
     }
 
-    /* here need to add the encryption process*/
+    // Receive the session key
+    rc = handshake_server(&server, &ck, server_fd, client_addr, session_key);
+    if (rc != TRUE)
+    {
+        printf("handshake_server failed!, exiting...");
+        return;
+    }
 
 
     // Send response to client

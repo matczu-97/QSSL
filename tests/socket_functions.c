@@ -11,7 +11,7 @@ void send_and_receive(int fd, struct sockaddr_in addr, const char* message, size
     }
 
     // waiting for response from client
-    char buffer[BUFFER_SIZE];
+    char buffer[10];
     size_t recv_len = recvfrom(fd, buffer, sizeof(buffer), 0, NULL, NULL);
     if (recv_len < 0) {
         perror("recvfrom - send_and_receive");

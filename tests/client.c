@@ -66,7 +66,7 @@ int client_init(Client* client)
     return TRUE;
 }
 
-int tls_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sockaddr_in server_addr)
+int public_key_exchange_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sockaddr_in server_addr)
 {
     size_t key_len = 0;
     char* server_message = NULL;
@@ -151,11 +151,75 @@ int tls_client(Client* client, Server_Keys* ser_keys, int client_fd, struct sock
     return TRUE;
 }
 
+int handshake_client(Client* client, Server_Keys* ser_keys,const int client_fd, struct sockaddr_in server_addr, unsigned char* session_key)
+{
+    int rc;
+    unsigned int ecc_signature_len = 0;
+    size_t encrypted_len = 0, dil_sign_len = 0;
+    char* message_to_send = NULL;
+    unsigned char encrypted_key[RSA_KEY_SIZE / 8], ecc_sig[64], dil_sign[OQS_SIG_dilithium_2_length_signature];
+    uint8_t encapsulated_message[OQS_KEM_kyber_768_length_ciphertext], shared_secret[OQS_KEM_kyber_768_length_shared_secret];  
+
+    // Encrypt AES key using RSA
+    rc = rsa_encrypt(ser_keys->rsa_public_key, client->aes_key, AES_KEY_SIZE, encrypted_key, &encrypted_len);
+    if (rc != TRUE) {
+        printf("failed to encrypt aes key!\n");
+        return FALSE;
+    }
+
+    // Sign the Key using ECC
+    rc = ecc_sign(client->ecc_private_key, encrypted_key, encrypted_len, ecc_sig, &ecc_signature_len);
+    if (rc != TRUE) {
+        printf("failed to sign the key using ECC!\n");
+        return FALSE;
+    }
+
+    // Send the Encrypted Key
+    message_to_send = "Encrypted AES Key";
+    send_and_receive(client_fd, server_addr, message_to_send, strlen(message_to_send));
+    send_and_receive(client_fd, server_addr, encrypted_key, encrypted_len);
+    // Send the Encrypted Key Signature
+    message_to_send = "Signature for AES Key";
+    send_and_receive(client_fd, server_addr, message_to_send, strlen(message_to_send));
+    send_and_receive(client_fd, server_addr, ecc_sig, ecc_signature_len);
+
+    // Encapsulate data using Kyber
+    rc = kyber_encapsulate(encapsulated_message, shared_secret, ser_keys->kyber_public_key);
+    if (rc != TRUE) {
+        printf("failed to encapsulate with kyber!\n");
+        return FALSE;
+    }
+
+    // Sign the Key using Dilithium
+    rc = dilithium_sign(client->dilithium_private_key, encapsulated_message, OQS_KEM_kyber_768_length_ciphertext, dil_sign, &dil_sign_len);
+    if (rc != TRUE) {
+        printf("failed to sign the key using Dilithium!\n");
+        return FALSE;
+    }
+
+    // Send the Encapsulated message
+    message_to_send = "Encapsulated Kyber Data";
+    send_and_receive(client_fd, server_addr, message_to_send, strlen(message_to_send));
+    send_and_receive(client_fd, server_addr, encapsulated_message, OQS_KEM_kyber_768_length_ciphertext);
+    // Send the Dilithium Signature
+    message_to_send = "Dilithium Signature";
+    send_and_receive(client_fd, server_addr, message_to_send, strlen(message_to_send));
+    send_and_receive(client_fd, server_addr, dil_sign, dil_sign_len);
+
+    printf("transfer of session key completed\n");
+
+    // create the session key using xor between both keys
+    xor(client->aes_key,shared_secret,session_key,AES_KEY_SIZE);
+    printf("Session key is Ready to use\n");
+
+    return TRUE;
+}
+
 int main() {
     WSADATA wsaData;
     int client_fd, rc;
     struct sockaddr_in server_addr;
-    char buffer[BUFFER_SIZE];
+    unsigned char buffer[BUFFER_SIZE], session_key[AES_KEY_SIZE];
     Server_Keys sk;
     Client client;
 
@@ -189,14 +253,22 @@ int main() {
     const char* message = "Hello, Server!";
     sendto(client_fd, message, strlen(message), 0, (struct sockaddr*)&server_addr, sizeof(server_addr));
 
-    rc = tls_client(&client, &sk, client_fd, server_addr);
+    // Transfer public keys between client and server
+    rc = public_key_exchange_client(&client, &sk, client_fd, server_addr);
     if (rc != TRUE)
     {
-        printf("tls_client failed!, exiting...");
+        printf("public_key_exchange_client failed!, exiting...");
         return;
     }
 
-    /* here need to add the encryption process*/
+    // Create the session key and send it
+    rc = handshake_client(&client, &sk, client_fd, server_addr, session_key);
+    if (rc != TRUE)
+    {
+        printf("handshake_client failed!, exiting...");
+        return;
+    }
+
 
     // Receive response from server
    /* int server_addr_len = sizeof(server_addr);
