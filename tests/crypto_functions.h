@@ -81,3 +81,5 @@ int dilithium_verify(uint8_t* dilithium_public_key, uint8_t* message_to_verify, 
 #pragma endregion
 
 void xor(const unsigned char* first, const unsigned char* second, unsigned char* result, size_t size);
+
+int write_key_file(const char* filename, const void* data, size_t size);

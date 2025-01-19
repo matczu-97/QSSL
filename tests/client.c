@@ -269,20 +269,21 @@ int main() {
         return;
     }
 
-
-    // Receive response from server
-   /* int server_addr_len = sizeof(server_addr);
-    int n = recvfrom(client_fd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&server_addr, &server_addr_len);
-    if (n == SOCKET_ERROR) {
-        printf("Receive failed: %d\n", WSAGetLastError());
-        closesocket(client_fd);
-        WSACleanup();
-        return EXIT_FAILURE;
+    rc = write_key_file("shared_client.bin", session_key, AES_KEY_SIZE);
+    if (rc != TRUE)
+    {
+        printf("failed to write to file, exiting...");
+        return;
     }
-    buffer[n] = '\0';
-    printf("Server: %s\n", buffer);*/
+
+    // loop for safe communication
+    while (1)
+    {
+     
+    }
 
     // Cleanup
+    client.cleanup(&client);
     closesocket(client_fd);
     WSACleanup();
     system("PAUSE");

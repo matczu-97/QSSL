@@ -409,3 +409,28 @@ void xor(const unsigned char* first, const unsigned char* second, unsigned char*
         result[i] = first[i] ^ second[i];
     }
 }
+
+int write_key_file(const char* filename, const void* data, size_t size) {
+    // Open the file in binary write mode
+    FILE* file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Error opening file");
+        return FALSE;
+    }
+
+    // Write the binary data to the file
+    size_t written = fwrite(data, 1, size, file);
+    if (written != size) {
+        perror("Error writing to file");
+        fclose(file);
+        return FALSE;
+    }
+
+    // Close the file
+    if (fclose(file) != 0) {
+        perror("Error closing file");
+        return FALSE;
+    }
+
+    return TRUE; // Success
+}

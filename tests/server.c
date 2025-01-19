@@ -322,11 +322,22 @@ int main() {
     }
 
 
-    // Send response to client
-    //const char* response = "Message received";
-    //sendto(server_fd, response, strlen(response), 0, (const struct sockaddr*)&client_addr, client_addr_len);
+    rc = write_key_file("shared_server.bin", session_key, AES_KEY_SIZE);
+    if (rc != TRUE)
+    {
+        printf("failed to write to file, exiting...");
+        return;
+    }
+
+
+    // loop for safe communication
+    while (1)
+    {
+    
+    }
 
     // Cleanup
+    server.cleanup(&server);
     closesocket(server_fd);
     WSACleanup();
     system("PAUSE");
