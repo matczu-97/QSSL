@@ -16,6 +16,8 @@ namespace QSSL_UI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            // Run the MainForm as the startup form
             Application.Run(new MainForm());
         }
     }

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qsslWPF", "qsslWPF.csproj", "{B8FDB084-FB5C-43BF-8653-95BAC4885EB5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8FDB084-FB5C-43BF-8653-95BAC4885EB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8FDB084-FB5C-43BF-8653-95BAC4885EB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8FDB084-FB5C-43BF-8653-95BAC4885EB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8FDB084-FB5C-43BF-8653-95BAC4885EB5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA441045-6A97-45E7-A797-895E99CA9924}
+	EndGlobalSection
+EndGlobal

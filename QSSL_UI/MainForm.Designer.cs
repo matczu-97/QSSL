@@ -29,35 +29,37 @@ namespace QSSL_UI
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
+            this.loadBtn = new System.Windows.Forms.Button();
+            this.headerLabel = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.openKeyFile = new System.Windows.Forms.Button();
+            this.keyTextBox = new System.Windows.Forms.TextBox();
+            this.openKeyFileBtn = new System.Windows.Forms.Button();
+            this.openKeyPanel = new System.Windows.Forms.Panel();
+            this.openKeyPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(219, 168);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(96, 29);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Load Key";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.loadKeybtn_Click);
+            this.loadBtn.Location = new System.Drawing.Point(193, 131);
+            this.loadBtn.Name = "button1";
+            this.loadBtn.Size = new System.Drawing.Size(96, 29);
+            this.loadBtn.TabIndex = 0;
+            this.loadBtn.Text = "Load Key";
+            this.loadBtn.UseVisualStyleBackColor = true;
+            this.loadBtn.Click += new System.EventHandler(this.loadKeybtn_Click);
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Arial Black", 30F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.label1.Location = new System.Drawing.Point(151, 32);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(235, 46);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "QSSL Bank";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.label1.UseMnemonic = false;
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.headerLabel.AutoSize = true;
+            this.headerLabel.Font = new System.Drawing.Font("Arial Black", 30F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.headerLabel.Location = new System.Drawing.Point(126, 9);
+            this.headerLabel.Name = "label1";
+            this.headerLabel.Size = new System.Drawing.Size(235, 46);
+            this.headerLabel.TabIndex = 1;
+            this.headerLabel.Text = "QSSL Bank";
+            this.headerLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.headerLabel.UseMnemonic = false;
+            this.headerLabel.Click += new System.EventHandler(this.label1_Click);
             // 
             // openFileDialog1
             // 
@@ -66,36 +68,46 @@ namespace QSSL_UI
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(58, 121);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(339, 20);
-            this.textBox1.TabIndex = 2;
-            this.textBox1.TextChanged += new System.EventHandler(this.txtFilePath_TextChanged);
+            this.keyTextBox.Location = new System.Drawing.Point(11, 8);
+            this.keyTextBox.Name = "textBox1";
+            this.keyTextBox.ReadOnly = true;
+            this.keyTextBox.Size = new System.Drawing.Size(339, 20);
+            this.keyTextBox.TabIndex = 2;
+            this.keyTextBox.TextChanged += new System.EventHandler(this.txtFilePath_TextChanged);
             // 
             // openKeyFile
             // 
-            this.openKeyFile.Location = new System.Drawing.Point(403, 116);
-            this.openKeyFile.Name = "openKeyFile";
-            this.openKeyFile.Size = new System.Drawing.Size(96, 29);
-            this.openKeyFile.TabIndex = 3;
-            this.openKeyFile.Text = "Open Key";
-            this.openKeyFile.UseVisualStyleBackColor = true;
-            this.openKeyFile.Click += new System.EventHandler(this.openKey_Click);
+            this.openKeyFileBtn.Location = new System.Drawing.Point(356, 3);
+            this.openKeyFileBtn.Name = "openKeyFile";
+            this.openKeyFileBtn.Size = new System.Drawing.Size(96, 29);
+            this.openKeyFileBtn.TabIndex = 3;
+            this.openKeyFileBtn.Text = "Open Key";
+            this.openKeyFileBtn.UseVisualStyleBackColor = true;
+            this.openKeyFileBtn.Click += new System.EventHandler(this.openKey_Click);
+            // 
+            // panel1
+            // 
+            this.openKeyPanel.Controls.Add(this.openKeyFileBtn);
+            this.openKeyPanel.Controls.Add(this.keyTextBox);
+            this.openKeyPanel.Location = new System.Drawing.Point(0, 74);
+            this.openKeyPanel.Name = "panel1";
+            this.openKeyPanel.Size = new System.Drawing.Size(477, 40);
+            this.openKeyPanel.TabIndex = 5;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.MenuHighlight;
-            this.ClientSize = new System.Drawing.Size(525, 280);
-            this.Controls.Add(this.openKeyFile);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(476, 211);
+            this.Controls.Add(this.openKeyPanel);
+            this.Controls.Add(this.headerLabel);
+            this.Controls.Add(this.loadBtn);
             this.Name = "MainForm";
             this.Text = "Bank Application";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Load += new System.EventHandler(this.Main_Load);
+            this.openKeyPanel.ResumeLayout(false);
+            this.openKeyPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -103,11 +115,12 @@ namespace QSSL_UI
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button loadBtn;
+        private System.Windows.Forms.Label headerLabel;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button openKeyFile;
+        private System.Windows.Forms.TextBox keyTextBox;
+        private System.Windows.Forms.Button openKeyFileBtn;
+        private System.Windows.Forms.Panel openKeyPanel;
     }
 }
 

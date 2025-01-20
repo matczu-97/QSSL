@@ -17,17 +17,16 @@ namespace QSSL_UI
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Main_Load(object sender, EventArgs e)
         {
 
         }
 
-       
         private void loadKeybtn_Click(object sender, EventArgs e)
         {
-            
+             ShowLoginForm();
         }
-       
+
 
         private void label1_Click(object sender, EventArgs e)
         {
@@ -52,9 +51,27 @@ namespace QSSL_UI
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     // Display the selected file path in the TextBox
-                    textBox1.Text = openFileDialog.FileName;
+                    keyTextBox.Text = openFileDialog.FileName;
                 }
             }
+        }
+
+        private void ShowLoginForm()
+        {
+            // Create and show the LoginForm
+            LoginForm loginForm = new LoginForm();
+            this.Hide();
+
+            // Show the LoginForm as a dialog
+            if (loginForm.ShowDialog() != DialogResult.OK)
+            {
+                MessageBox.Show("Login canceled or failed.", "Notice");
+            }
+            else
+            {
+               
+            }
+            this.Show();
         }
     }
 }
