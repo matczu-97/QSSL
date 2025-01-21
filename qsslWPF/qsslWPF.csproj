@@ -7,9 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\vault.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Model\" />
     <Folder Include="ViewModel\" />
-    <Folder Include="Resources\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\vault.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

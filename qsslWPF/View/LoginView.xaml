@@ -63,58 +63,114 @@
                 </Button>
             </Grid>
 
-            <StackPanel Width="250"
-                        Grid.Row="2"
+            <StackPanel
+                        Grid.Row="1"
                         Orientation="Vertical"
-                        Margin="0,35,0,0">
+                        Margin="290,35,290,0">
 
                 <TextBlock Text="QSSL" 
                            Foreground="White"
                            FontSize="25"
                            FontWeight="Normal"
                            HorizontalAlignment="Center"
-                           FontFamily="Forte"/>
-                
+                           FontFamily="Comic Sans MS"/>
+
                 <Image Source="/Resources/vault.jpg" 
                        Width="150" Height="150"/>
 
-                <TextBlock Text="Quantum safe access" 
-                           Foreground="White"
-                           FontSize="16"
-                           FontWeight="Normal"
-                           HorizontalAlignment="Center"
-                           FontFamily="Forte"
-                           TextWrapping="Wrap"
-                           TextAlignment="Justify"/>
+
 
                 <TextBlock Text="Username" 
-                           Foreground="DarkGray"
-                           FontSize="12"
-                           FontWeight="Normal"
-                           HorizontalAlignment="Center"
-                           FontFamily="Montserrat"
-                           Margin="0,10,0,0"/>
-
-                <TextBox x:Name="txtUser"
-                         FontSize="13"
-                         FontFamily="Montserrat"
-                         FontWeight="Medium"
-                         Background="Transparent"
-                         Foreground="White"
-                         CaretBrush="LightGray"
-                         BorderBrush="DarkGray"
-                         BorderThickness="1,1,1,1"
-                         VerticalContentAlignment="Center"
-                         HorizontalContentAlignment="Center"
-                         Margin="0,5,0,0"/>
-                <TextBlock Text="Quantum safe access" 
                            Foreground="White"
-                           FontSize="16"
+                           FontSize="15"
                            FontWeight="Normal"
                            HorizontalAlignment="Center"
-                           FontFamily="Forte"
-                           TextWrapping="Wrap"
-                           TextAlignment="Justify"/>
+                           FontFamily="Constantia"
+                           Margin="0,30,0,5"/>
+
+                <Border CornerRadius="15" 
+                        BorderBrush="SteelBlue" 
+                        BorderThickness="2" 
+                        Background="LightSkyBlue" 
+                        Padding="5"
+                        Height="30">
+                    <TextBox x:Name="txtUser"
+                             FontSize="13"
+                             FontWeight="Medium"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="black"
+                             CaretBrush="LightGray"
+                             VerticalContentAlignment="Center"
+                             HorizontalContentAlignment="Center"
+                             Height="30" Margin="0,-7,0,-7"/>
+                </Border>
+                
+                <TextBlock Text="Password" 
+                           Foreground="White"
+                           FontSize="15"
+                           FontWeight="Normal"
+                           HorizontalAlignment="Center"
+                           FontFamily="Constantia"
+                           Margin="0,10,0,5"/>
+
+                <Border CornerRadius="15" 
+                        BorderBrush="SteelBlue" 
+                        BorderThickness="2" 
+                        Background="LightSkyBlue" 
+                        Padding="5"
+                        Height="30">
+                    <PasswordBox x:Name="txtPassword"
+                             FontSize="13"
+                             FontWeight="Medium"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="Black"
+                             CaretBrush="LightGray"
+                             VerticalContentAlignment="Center"
+                             HorizontalContentAlignment="Center"
+                             Height="30" Margin="0,-7,0,-7"/>
+
+                </Border>
+
+                <Button x:Name="btnLogin"
+                    BorderThickness="0"
+                    Content="Login"
+                    Foreground="White"
+                    FontSize="15"
+                    FontFamily="Comic Sans MS"
+                    Cursor="Hand"
+                    Click="btnLogin_Click"
+                    Width="150"
+                    Height="30"
+                    Margin="0,40,0,0"
+                    >
+                <Button.Style>
+                    <Style TargetType="Button">
+                            <Setter Property="Background" Value="LightSkyBlue"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF039EFF"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="15" 
+                            BorderBrush="SteelBlue" 
+                            BorderThickness="2" 
+                            Background="{TemplateBinding Background}" 
+                            >
+                        <ContentPresenter VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+                </Button.Template>
+                </Button>
+                
+
+
             </StackPanel>
 
         </Grid>
