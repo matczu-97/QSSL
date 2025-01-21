@@ -51,6 +51,7 @@ namespace qsslWPF.ViewModels
         private void ExecuteLoadKeyCommand(object obj)
         {
             //open login window
+            //need to send to client the key
             var loginView = new LoginView();
             loginView.Show();
             loginView.IsVisibleChanged += (s, ev) =>
@@ -70,7 +71,7 @@ namespace qsslWPF.ViewModels
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
             // Set filters for file types (optional)
-            openFileDialog.Filter = "Text files (*.bin)|*.txt|All files (*.*)|*.*";
+            openFileDialog.Filter = "Binary files (*.bin)|*.bin|All files (*.*)|*.*";
 
             // Show the OpenFileDialog
             if (openFileDialog.ShowDialog() == true)
