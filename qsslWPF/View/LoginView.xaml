@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:qsslWPF.View"
+        xmlns:viewModel="clr-namespace:qsslWPF.ViewModel"
         mc:Ignorable="d"
         Title="LoginView" Height="550" Width="800"
         WindowStyle="None"
@@ -12,6 +13,15 @@
         Background="Transparent"
         AllowsTransparency="True"
         MouseDown="Window_MouseDown">
+    <Window.DataContext>
+        <viewModel:LoginViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+    </Window.Resources>
+    <Window.Visibility>
+        <Binding Path="IsViewVisible" Mode="TwoWay" Converter="{StaticResource BooleanToVisibility}"></Binding>
+    </Window.Visibility>
     <Border CornerRadius="20"
             Background="#1F4784"
             BorderBrush="SkyBlue"
@@ -95,6 +105,7 @@
                         Padding="5"
                         Height="30">
                     <TextBox x:Name="txtUser"
+                             Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="13"
                              FontWeight="Medium"
                              Background="Transparent"
@@ -121,6 +132,7 @@
                         Padding="5"
                         Height="30">
                     <PasswordBox x:Name="txtPassword"
+                             PasswordChanged="txtPassword_PasswordChanged"
                              FontSize="13"
                              FontWeight="Medium"
                              Background="Transparent"
@@ -133,17 +145,26 @@
 
                 </Border>
 
+                <TextBlock Text="{Binding ErrorMessage}" 
+                           Foreground="AntiqueWhite"
+                           FontSize="15"
+                           FontWeight="Normal"
+                           HorizontalAlignment="Center"
+                           FontFamily="Constantia"
+                           Margin="0,10,0,0"/>
+
+
                 <Button x:Name="btnLogin"
+                    Command="{Binding LoginCommand}"
                     BorderThickness="0"
                     Content="Login"
                     Foreground="White"
                     FontSize="15"
                     FontFamily="Comic Sans MS"
                     Cursor="Hand"
-                    Click="btnLogin_Click"
                     Width="150"
                     Height="30"
-                    Margin="0,40,0,0"
+                    Margin="0,35,0,0"
                     >
                 <Button.Style>
                     <Style TargetType="Button">

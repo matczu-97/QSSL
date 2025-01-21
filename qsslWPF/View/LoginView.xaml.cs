@@ -1,4 +1,5 @@
-﻿using System;
+﻿using qsslWPF.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,6 +44,14 @@ namespace qsslWPF.View
         private void btnLogin_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is LoginViewModel viewModel)
+            {
+                viewModel.Password = ((PasswordBox)sender).Password;
+            }
         }
     }
 }
