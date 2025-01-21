@@ -71,7 +71,6 @@ namespace qsslWPF.ViewModel
         public LoginViewModel()
         {
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand,CanExecuteLoginCommand);
-
         }
 
         private bool CanExecuteLoginCommand(object obj)

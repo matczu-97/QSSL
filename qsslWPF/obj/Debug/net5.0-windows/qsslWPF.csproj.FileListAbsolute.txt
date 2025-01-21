@@ -6,12 +6,10 @@ S:\QSSL\qsslWPF\bin\Debug\net5.0-windows\qsslWPF.dll
 S:\QSSL\qsslWPF\bin\Debug\net5.0-windows\ref\qsslWPF.dll
 S:\QSSL\qsslWPF\bin\Debug\net5.0-windows\qsslWPF.pdb
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF.csprojAssemblyReference.cache
-S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\MainWindow.g.cs
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\LoginView.g.cs
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\App.g.cs
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF_MarkupCompile.cache
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF_MarkupCompile.lref
-S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\MainWindow.baml
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\LoginView.baml
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF.g.resources
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF.GeneratedMSBuildEditorConfig.editorconfig
@@ -23,3 +21,5 @@ S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\ref\qsslWPF.dll
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF.pdb
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF.genruntimeconfig.cache
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\GeneratedInternalTypeHelper.g.cs
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\MainScreenView.g.cs
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\MainScreenView.baml
