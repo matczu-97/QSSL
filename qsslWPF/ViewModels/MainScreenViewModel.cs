@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using qsslSdk;
 using qsslWPF.View;
 using qsslWPF.ViewModel;
 using System;
@@ -6,12 +7,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace qsslWPF.ViewModels
 {
     public class MainScreenViewModel : ViewModelBase
     {
+        public event Action RequestClose;
+
+        private SDK sdk;
         private string _keyPath;
 
         public string KeyPath
@@ -35,6 +40,9 @@ namespace qsslWPF.ViewModels
         {
             OpenKeyCommand = new ViewModelCommand(ExecuteOpenKeyCommand);
             LoadKeyCommand = new ViewModelCommand(ExecuteLoadKeyCommand, CanExecuteLoadKeyCommand);
+            
+            // Access the global SDK instance
+            sdk = ((App)Application.Current).sdk;
         }
 
         private bool CanExecuteLoadKeyCommand(object obj)
@@ -50,19 +58,16 @@ namespace qsslWPF.ViewModels
 
         private void ExecuteLoadKeyCommand(object obj)
         {
+            //sending the path to SDK
+            sdk.SendFilePath(KeyPath);
+            System.Diagnostics.Debug.WriteLine("Key path sent to SDK!");
+
             //open login window
-            //need to send to client the key
             var loginView = new LoginView();
             loginView.Show();
-            loginView.IsVisibleChanged += (s, ev) =>
-            {
-                if (loginView.IsVisible == false && loginView.IsLoaded)
-                {
-                    var mainView = new MainScreenView();
-                    mainView.Show();
-                    loginView.Close();
-                }
-            };
+
+            // Request the view to close
+            RequestClose?.Invoke();
         }
 
         private void ExecuteOpenKeyCommand(object obj)

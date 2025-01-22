@@ -23,3 +23,10 @@ S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF.genruntimeconfig.cache
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\GeneratedInternalTypeHelper.g.cs
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\MainScreenView.g.cs
 S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\MainScreenView.baml
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\LoadingView.g.cs
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\LoadingView.baml
+S:\QSSL\qsslWPF\bin\Debug\net5.0-windows\qsslSdk.dll
+S:\QSSL\qsslWPF\bin\Debug\net5.0-windows\qsslSdk.pdb
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\qsslWPF.csproj.CopyComplete
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\SuccessView.g.cs
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\View\SuccessView.baml

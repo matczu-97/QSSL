@@ -23,6 +23,14 @@ namespace qsslWPF.View
         public LoginView()
         {
             InitializeComponent();
+
+            if (DataContext is LoginViewModel viewModel)
+            {
+                viewModel.RequestClose += () =>
+                {
+                    this.Close();
+                };
+            }
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
@@ -39,11 +47,6 @@ namespace qsslWPF.View
         private void btnCloseWindow_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
-        }
-
-        private void btnLogin_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void txtPassword_PasswordChanged(object sender, RoutedEventArgs e)

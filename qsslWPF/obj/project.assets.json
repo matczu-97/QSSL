@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net5.0-windows7.0": {}
+    "net5.0-windows7.0": {
+      "qsslSdk/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/qsslSdk.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/qsslSdk.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "qsslSdk/1.0.0": {
+      "type": "project",
+      "path": "../qsslSdk/qsslSdk.csproj",
+      "msbuildProject": "../qsslSdk/qsslSdk.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net5.0-windows7.0": []
+    "net5.0-windows7.0": [
+      "qsslSdk >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\raztibi\\.nuget\\packages\\": {}
@@ -33,7 +52,11 @@
       "frameworks": {
         "net5.0-windows7.0": {
           "targetAlias": "net5.0-windows",
-          "projectReferences": {}
+          "projectReferences": {
+            "S:\\QSSL\\qsslSdk\\qsslSdk.csproj": {
+              "projectPath": "S:\\QSSL\\qsslSdk\\qsslSdk.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

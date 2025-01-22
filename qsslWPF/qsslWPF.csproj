@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\qsslSdk\qsslSdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\vault.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

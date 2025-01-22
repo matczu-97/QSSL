@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET5_0;NETCOREAPP
 S:\QSSL\qsslWPF\App.xaml
-279502091
+4139606054
 
-111984111995
-193-1891726104
-View\LoginView.xaml;View\MainScreenView.xaml;
+13738352341
+194-936823737
+View\LoadingView.xaml;View\LoginView.xaml;View\MainScreenView.xaml;View\SuccessView.xaml;
 
-True
+False
 
