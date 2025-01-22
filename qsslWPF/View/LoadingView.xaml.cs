@@ -1,4 +1,5 @@
-﻿using System;
+﻿using qsslWPF.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,14 @@ namespace qsslWPF.View
         {
             InitializeComponent();
             StartLoading();
+            
+            if (DataContext is LoadingViewModel viewModel)
+            {
+                viewModel.RequestClose += () =>
+                {
+                    this.Close();
+                };
+            }
         }
 
         private async void StartLoading()

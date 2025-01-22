@@ -23,23 +23,28 @@ namespace qsslWPF.ViewModels
 
         private void Sdk_LoginResultEventHandler(bool obj)
         {
-            if (obj)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                var successView = new SuccessView();
-                successView.Show();
-            }
-            else {
-
-                var loginViewModel = new LoginViewModel("Login Operation failed, wrong Username Or Password!");
-                var loginView = new LoginView
+                if (obj)
                 {
-                    DataContext = loginViewModel
-                };
-                loginView.Show();
-            }
+                    var successView = new SuccessView();
+                    successView.Show();
+                }
+                else
+                {
 
-            // Request the view to close
-            RequestClose?.Invoke();
+                    var loginViewModel = new LoginViewModel("Login Operation failed");
+                    var loginView = new LoginView
+                    {
+                        DataContext = loginViewModel
+                    };
+                    loginView.Show();
+                }
+
+                sdk.LoginResultEvent -= Sdk_LoginResultEventHandler;
+                // Request the view to close
+                RequestClose?.Invoke();
+            });
         }
     }
 }

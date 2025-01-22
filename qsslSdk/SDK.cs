@@ -1,5 +1,7 @@
 ﻿using qsslWPF.Model;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace qsslSdk
 {
@@ -27,11 +29,15 @@ namespace qsslSdk
         // Send user model (username and password) to the backend
         public void SendUserModel(UserModel userModel)
         {
-            // Simulate backend login logic
-            bool loginSuccess = userModel.Username == "admin" && userModel.Password == "password";
+            Task.Run(() =>
+            {
+                // Simulate backend login logic
+                bool loginSuccess = userModel.Username == "admin" && userModel.Password == "password";
 
-            // Trigger the login result event
-            LoginResultEvent?.Invoke(loginSuccess);
+                Thread.Sleep(5000);
+                // Trigger the login result event
+                LoginResultEvent?.Invoke(loginSuccess);
+            });
         }
     }
 

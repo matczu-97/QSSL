@@ -13,7 +13,10 @@
         Background="Transparent"
         AllowsTransparency="True"
         MouseDown="Window_MouseDown">
-
+    <Window.DataContext>
+        <viewModel:SuccessViewModel/>
+    </Window.DataContext>
+    
     <Border CornerRadius="20"
             Background="#1F4784"
             BorderBrush="SkyBlue"
