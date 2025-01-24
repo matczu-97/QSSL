@@ -284,7 +284,7 @@ int main() {
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(SERVER_PORT);
 
     if (bind(server_fd, (const struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         perror("Bind failed");
@@ -292,7 +292,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    printf("Server is running on port %d\n", PORT);
+    printf("Server is running on port %d\n", SERVER_PORT);
 
     // Receive Hello message from client
     memset(buffer, 0, BUFFER_SIZE);
@@ -333,7 +333,7 @@ int main() {
     // loop for safe communication
     while (1)
     {
-    
+        
     }
 
     // Cleanup

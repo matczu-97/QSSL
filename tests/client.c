@@ -85,7 +85,7 @@ int public_key_exchange_client(Client* client, Server_Keys* ser_keys, int client
             return FALSE;
         }
     }
-    
+
     // Recieve the ECC Key
     print_header_and_free(client_fd, server_addr, &server_message, &key_len);
     receive_and_send(client_fd, server_addr, &server_message, &key_len);
@@ -215,11 +215,134 @@ int handshake_client(Client* client, Server_Keys* ser_keys,const int client_fd, 
     return TRUE;
 }
 
+int read_binary_file(const unsigned char* filename, unsigned char** dest, size_t* size) {
+    
+    FILE* file = fopen(filename, "rb");
+    if (!file) {
+        perror("Error opening file");
+        return FALSE;
+    }
+
+    // Move to the end of the file to determine its size
+    if (fseek(file, 0, SEEK_END) != 0) {
+        perror("Error seeking file");
+        fclose(file);
+        return FALSE;
+    }
+
+    long file_size = ftell(file);
+    if (file_size < 0) {
+        perror("Error getting file size");
+        fclose(file);
+        return FALSE;
+    }
+
+    // Return to the start of the file
+    rewind(file);
+
+    // Allocate memory for the buffer
+    *dest = (unsigned char*)malloc(file_size);
+    if (!*dest) {
+        perror("Error allocating memory");
+        fclose(file);
+        return FALSE;
+    }
+
+    // Read the file into the buffer
+    size_t read_size = fread(*dest, 1, file_size, file);
+    if (read_size != (size_t)file_size) {
+        perror("Error reading file");
+        free(*dest);
+        fclose(file);
+        return FALSE;
+    }
+
+    // Set the size and close the file
+    *size = read_size;
+    fclose(file);
+    return TRUE;
+}
+
+int send_user_with_encrypt_sign_and_result(int server_fd, struct sockaddr_in client_addr, const unsigned char* message, size_t len,
+                                unsigned char* enc_key, uint8_t* dilithium_client_secret_key, uint8_t* dilithium_server_public_key, unsigned char* result, size_t*  res_len)
+{
+    unsigned char iv[AES_BLOCK_SIZE] = "000000000000000";
+    unsigned char ciphertext[256], dil_sign[OQS_SIG_dilithium_2_length_signature];
+    unsigned char* messageToSend = NULL;
+    size_t cipher_len = 0, dil_sign_len = 0,sent_len=0;
+    memset(ciphertext,'\0', 256);
+
+    int rc = aes_encrypt(enc_key, message,len,iv,ciphertext,&cipher_len);
+    if (rc != TRUE)
+    {
+        printf("Failed to encrypt the message!\n");
+        return FALSE;
+    }
+
+    rc = dilithium_sign(dilithium_client_secret_key, ciphertext, cipher_len, dil_sign,&dil_sign_len);
+    if (rc != TRUE)
+    {
+        printf("Failed to Sign the message!\n");
+        return FALSE;
+    }
+
+
+    sent_len = cipher_len + dil_sign_len;
+    messageToSend = malloc(sent_len);
+    if (messageToSend == NULL) {
+        perror("malloc - aes_encrypt_send_and_recv");
+        return;
+    }
+
+    // copy encrypted message and signature
+    memcpy(messageToSend, ciphertext, cipher_len);
+    memcpy((messageToSend + cipher_len), dil_sign, dil_sign_len);
+    (messageToSend)[sent_len] = '\0';
+
+    int sendto_len = sendto(server_fd, messageToSend, sent_len, 0, (const struct sockaddr*)&client_addr, sizeof(client_addr));
+    if (sent_len < 0) {
+        perror("sendto - aes_encrypt_send_and_recv");
+    }
+    else if ((size_t)sendto_len != sent_len) {
+        fprintf(stderr, "Incomplete key sent: %zd/%zu bytes - aes_encrypt_send_and_recv\n", len, sent_len);
+    }
+
+    // waiting for response from client
+    unsigned char buffer[BUFFER_SIZE];
+    size_t recv_len = recvfrom(server_fd, buffer, sizeof(buffer), 0, NULL, NULL);
+    if (recv_len < 0) {
+        perror("recvfrom - send_and_receive");
+        return;
+    }
+    
+    int encryptMessageSize = recv_len - OQS_SIG_dilithium_2_length_signature;
+
+   rc = dilithium_verify(dilithium_server_public_key, buffer, encryptMessageSize, buffer + encryptMessageSize, OQS_SIG_dilithium_2_length_signature);
+   if (rc != TRUE)
+   {
+       printf("Failed to Verify the message!\n");
+       return FALSE;
+   }
+
+   unsigned char iv2[AES_BLOCK_SIZE] = "000000000000000";
+   rc = aes_decrypt(enc_key, buffer, encryptMessageSize, iv2, result, res_len);
+   if (rc != TRUE)
+   {
+       printf("Failed to Decrypt the message!\n");
+       return FALSE;
+   }
+
+   return TRUE;
+}
+
 int main() {
     WSADATA wsaData;
-    int client_fd, rc;
-    struct sockaddr_in server_addr;
-    unsigned char buffer[BUFFER_SIZE], session_key[AES_KEY_SIZE];
+    int client_fd, rc,wpf_fd, isUser = 0, isPath = 0;
+    struct sockaddr_in server_addr,wpf_client_addr,wpf_server_addr;
+    unsigned char buffer[BUFFER_SIZE], session_key[AES_KEY_SIZE],resultofDecryption[256];
+    unsigned char* wpfBuffer = NULL, *sessionKeyToUse = NULL;
+    size_t wpf_message_len=0, keyLenFromFile=0,resultOfDecryption_len=0;
+    socklen_t wpf__client_addr_len = sizeof(wpf_client_addr);
     Server_Keys sk;
     Client client;
 
@@ -246,7 +369,7 @@ int main() {
     // Configure server address
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(SERVER_PORT);
     server_addr.sin_addr.s_addr = inet_addr(LOCALHOST);
 
     // Send message to server
@@ -269,6 +392,7 @@ int main() {
         return;
     }
 
+    // Write key to PC
     rc = write_key_file("shared_client.bin", session_key, AES_KEY_SIZE);
     if (rc != TRUE)
     {
@@ -276,14 +400,93 @@ int main() {
         return;
     }
 
+    //Setting up communication with WPF
+    // Create socket
+    if ((wpf_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Bind socket to the address
+    memset(&wpf_server_addr, 0, sizeof(server_addr));
+    wpf_server_addr.sin_family = AF_INET;
+    wpf_server_addr.sin_addr.s_addr = INADDR_ANY;
+    wpf_server_addr.sin_port = htons(WPF_CLIENT_PORT);
+
+    if (bind(wpf_fd, (const struct sockaddr*)&wpf_server_addr, sizeof(wpf_server_addr)) < 0) {
+        perror("Bind WPF failed");
+        close(wpf_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("WPF receiver is running on port %d\n", WPF_CLIENT_PORT);
+
+    // Receive Hello message from client WPF
+    memset(buffer, 0, BUFFER_SIZE);
+    int n = recvfrom(wpf_fd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&wpf_client_addr, &wpf__client_addr_len);
+    if (n < 0) {
+        perror("Receive hello WPF failed");
+        return;
+    }
+
     // loop for safe communication
     while (1)
     {
-     
+        memset(resultofDecryption, 0, 256);
+        
+        // Receive message from WPF
+        receive_and_send(wpf_fd, wpf_client_addr, &wpfBuffer, &wpf_message_len);
+        
+        // Check if the message is "Path"
+        if (wpf_message_len == 4 && memcmp(wpfBuffer, "Path", 4) == 0) {
+            printf("Got 'Path' Message from WPF.\n");
+            isPath = 1;
+        }
+        // Check if the message is "User"
+        else if (wpf_message_len == 4 && memcmp(wpfBuffer, "User", 4) == 0) {
+            printf("Got 'User' Message from WPF.\n");
+            isUser = 1;
+        }
+        else {
+            continue;
+        }
+        receive_and_send(client_fd, server_addr, &wpfBuffer, &wpf_message_len);
+        if (isPath == 1)
+        {
+            rc = read_binary_file(wpfBuffer, &sessionKeyToUse, &keyLenFromFile);
+            if (rc != TRUE)
+            {
+                perror("Read File WPF failed");
+                break;
+            }
+            isPath = 0;
+        }
+        else if (isUser == 1)
+        {
+            rc = send_user_with_encrypt_sign_and_result(client_fd, server_addr, wpfBuffer, wpf_message_len, sessionKeyToUse,
+                    client.dilithium_private_key, sk.dilithium_public_key, resultofDecryption, &resultOfDecryption_len);
+            if (rc != TRUE)
+            {
+                perror("Send User to server failed, return False to WPF!");
+
+                size_t sent_len = sendto(wpf_fd, "False", sizeof("False"), 0, (const struct sockaddr*)&wpf_client_addr, sizeof(wpf_client_addr));
+                if (sent_len < 0) {
+                    perror("sendto wpf");
+                }
+                break;
+            }
+
+            size_t sent_len = sendto(wpf_fd, resultofDecryption, resultOfDecryption_len, 0, (const struct sockaddr*)&wpf_client_addr, sizeof(wpf_client_addr));
+            if (sent_len < 0) {
+                perror("sendto wpf");
+            }
+            isUser = 0;
+        }
     }
 
     // Cleanup
     client.cleanup(&client);
+    closesocket(wpf_fd);
     closesocket(client_fd);
     WSACleanup();
     system("PAUSE");
