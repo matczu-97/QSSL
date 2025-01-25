@@ -67,7 +67,7 @@ namespace qsslWPF.ViewModels
             loginView.Show();
 
             // Request the view to close
-            RequestClose?.Invoke();
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => RequestClose?.Invoke()));
         }
 
         private void ExecuteOpenKeyCommand(object obj)

@@ -32,6 +32,18 @@
                 <RowDefinition Height="30"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
+            <Button Grid.Row="1" 
+        Content="←"
+        Width="40"
+        Height="40"
+        Background="Transparent"
+        Foreground="White"
+        FontSize="20"
+        FontFamily="Consolas"
+        HorizontalAlignment="Left"
+        VerticalAlignment="Top"
+        Margin="10,10,0,0"
+        Command="{Binding ReturnCommand}"/>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>

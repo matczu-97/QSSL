@@ -1,6 +1,7 @@
 ﻿using qsslSdk;
 using qsslWPF.Model;
 using qsslWPF.View;
+using qsslWPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,17 +22,20 @@ namespace qsslWPF.ViewModel
         private string _passsword;
         private string _errorMessage;
         private bool _isViewVisible = true;
+        public ICommand ReturnCommand { get; }
 
         public LoginViewModel()
         {
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
             sdk = ((App)Application.Current).sdk;
+            ReturnCommand = new ViewModelCommand(ExecuteReturn);
         }
         public LoginViewModel(string err)
         {
             LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
             sdk = ((App)Application.Current).sdk;
             ErrorMessage = err;
+            ReturnCommand = new ViewModelCommand(ExecuteReturn);
         }
 
         public string Username
@@ -85,7 +89,7 @@ namespace qsslWPF.ViewModel
         }
 
         public ICommand LoginCommand { get; }
-
+        
 
         private bool CanExecuteLoginCommand(object obj)
         {
@@ -112,6 +116,16 @@ namespace qsslWPF.ViewModel
             sdk.SendUserModel(userModel);
             // Only close after showing loading view
             Application.Current.Dispatcher.BeginInvoke(new Action(() => RequestClose?.Invoke()));
+        }
+
+        private void ExecuteReturn(object obj)
+        {
+            var mainViewModel = new MainScreenViewModel();
+            var mainView = new MainScreenView { DataContext = mainViewModel };
+            mainViewModel.RequestClose += () => mainView.Close();
+            mainView.Show();
+            RequestClose?.Invoke();
+
         }
     }
 }
