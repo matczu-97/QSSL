@@ -34,10 +34,8 @@ namespace qsslWPF.ViewModels
                 {
 
                     var loginViewModel = new LoginViewModel("Login Operation failed");
-                    var loginView = new LoginView
-                    {
-                        DataContext = loginViewModel
-                    };
+                    var loginView = new LoginView { DataContext = loginViewModel };
+                    loginViewModel.RequestClose += () => loginView.Close();
                     loginView.Show();
                 }
 

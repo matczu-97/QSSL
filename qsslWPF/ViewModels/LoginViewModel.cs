@@ -100,22 +100,18 @@ namespace qsslWPF.ViewModel
 
         private void ExecuteLoginCommand(object obj)
         {
-            
             var userModel = new UserModel
             {
                 Username = Username,
                 Password = Password
             };
 
-            //open loading window
             var loadingView = new LoadingView();
             loadingView.Show();
-            
-            // Request the view to close
-            RequestClose?.Invoke();
-            
+
             sdk.SendUserModel(userModel);
-            System.Diagnostics.Debug.WriteLine("User sent to SDK!");
+            // Only close after showing loading view
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => RequestClose?.Invoke()));
         }
     }
 }
