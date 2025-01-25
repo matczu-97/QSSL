@@ -34,7 +34,9 @@ namespace qsslSdk
             {
                 // Simulate backend login logic
                 bool loginSuccess = userModel.Username == "admin" && userModel.Password == "password";
-
+                //udpComm.SendAndRecv("User");
+                //udpComm.SendAndRecv(userModel);
+                //udpComm.Recv();
                 Thread.Sleep(5000);
                 // Trigger the login result event
                 LoginResultEvent?.Invoke(loginSuccess);
