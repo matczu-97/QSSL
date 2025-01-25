@@ -153,16 +153,16 @@ static OQS_STATUS example_heap(void) {
 	return OQS_SUCCESS; // success
 }
 
-//int main(void) {
-//	OQS_init();
-//	if (example_stack() == OQS_SUCCESS && example_heap() == OQS_SUCCESS) {
-//		OQS_destroy();
-//		return EXIT_SUCCESS;
-//	} else {
-//		OQS_destroy();
-//		return EXIT_FAILURE;
-//	}
-//}
+int main(void) {
+	OQS_init();
+	if (example_stack() == OQS_SUCCESS && example_heap() == OQS_SUCCESS) {
+		OQS_destroy();
+		return EXIT_SUCCESS;
+	} else {
+		OQS_destroy();
+		return EXIT_FAILURE;
+	}
+}
 
 void cleanup_stack(uint8_t *secret_key, size_t secret_key_len,
                    uint8_t *shared_secret_e, uint8_t *shared_secret_d,

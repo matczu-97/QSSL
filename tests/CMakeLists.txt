@@ -47,6 +47,9 @@ set(PYTHON3_EXEC python)
 add_executable(example_sig example_sig.c)
 target_link_libraries(example_sig PRIVATE ${TEST_DEPS})
 
+add_executable(example_kem example_kem.c)
+target_link_libraries(example_kem PRIVATE ${TEST_DEPS})
+
 # KEM API tests
 add_executable(server server.c crypto_functions.c socket_functions.c)
 target_include_directories(server PRIVATE .)
