@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "kjtD5kr1ukJ/fZFLL64swoZrVjG0l9oMLlWedFRE9ZcOS17nNurOrMt/IimlTbEEE1dDjBlXNK1w3jmGSeKl2Q==",
+  "dgSpecHash": "HF3JhOVY3sqjYux1uxpmiyb5IjH89HNOSAO/ntvOY5BUy2HRN07tE4I3EMblAZjyYa9MVNJ3/jmLIImMLKI6Hw==",
   "success": true,
-  "projectFilePath": "S:\\QSSL\\qsslSdk\\qsslSdk.csproj",
+  "projectFilePath": "C:\\Study\\final project\\QSSL_CODE\\qsslSdk\\qsslSdk.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\raztibi\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
-    "C:\\Users\\raztibi\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+    "C:\\Users\\czmat\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\czmat\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
   ],
   "logs": []
 }

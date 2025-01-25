@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "W+uJ0dun2CMwjJM9Fr4vT4JGDibrX3NXiUz7zI6Z64n2kB1FwV3NpHkunwPNWnzruAX/xEUr/qqvRSNH07Ew6g==",
+  "dgSpecHash": "j4xylGKlrMLLWoJgquRQByIeMfzGZYuI0YY/4FLzCuw55yb+lhlVs9SI9draE6WCe+M+KfwObIrSf7gA4zjIPg==",
   "success": true,
-  "projectFilePath": "S:\\QSSL\\qsslWPF\\qsslWPF.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Study\\final project\\QSSL_CODE\\qsslWPF\\qsslWPF.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\czmat\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\5.0.0\\microsoft.windowsdesktop.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\czmat\\.nuget\\packages\\microsoft.netcore.app.ref\\5.0.0\\microsoft.netcore.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\czmat\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\5.0.0\\microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\czmat\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\5.0.17\\microsoft.netcore.app.host.win-x64.5.0.17.nupkg.sha512"
+  ],
   "logs": []
 }
