@@ -78,7 +78,7 @@ namespace qsslWPF.View {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/qsslWPF;V1.0.0.0;component/view/loadingview.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/qsslWPF;component/view/loadingview.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\View\LoadingView.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

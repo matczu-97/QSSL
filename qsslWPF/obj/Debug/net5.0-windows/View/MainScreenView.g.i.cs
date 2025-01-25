@@ -94,7 +94,7 @@ namespace qsslWPF.View {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/qsslWPF;V1.0.0.0;component/view/mainscreenview.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/qsslWPF;component/view/mainscreenview.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\View\MainScreenView.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
