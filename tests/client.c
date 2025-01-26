@@ -272,12 +272,16 @@ int send_user_with_encrypt_sign_and_result(int server_fd, struct sockaddr_in cli
     size_t cipher_len = 0, dil_sign_len = 0,sent_len=0;
     memset(ciphertext,'\0', 256);
 
+    //write_key_file("usernamecheck.bin", message,len);
+
     int rc = aes_encrypt(enc_key, message,len,iv,ciphertext,&cipher_len);
     if (rc != TRUE)
     {
         printf("Failed to encrypt the message!\n");
         return FALSE;
     }
+
+    //write_key_file("usernamecheckEcnrypted.bin", ciphertext, cipher_len);
 
     rc = dilithium_sign(dilithium_client_secret_key, ciphertext, cipher_len, dil_sign,&dil_sign_len);
     if (rc != TRUE)
@@ -291,7 +295,7 @@ int send_user_with_encrypt_sign_and_result(int server_fd, struct sockaddr_in cli
     messageToSend = malloc(sent_len);
     if (messageToSend == NULL) {
         perror("malloc - aes_encrypt_send_and_recv");
-        return;
+        return FALSE;
     }
 
     // copy encrypted message and signature
@@ -302,17 +306,21 @@ int send_user_with_encrypt_sign_and_result(int server_fd, struct sockaddr_in cli
     int sendto_len = sendto(server_fd, messageToSend, sent_len, 0, (const struct sockaddr*)&client_addr, sizeof(client_addr));
     if (sent_len < 0) {
         perror("sendto - aes_encrypt_send_and_recv");
+        return FALSE;
     }
     else if ((size_t)sendto_len != sent_len) {
         fprintf(stderr, "Incomplete key sent: %zd/%zu bytes - aes_encrypt_send_and_recv\n", len, sent_len);
+        return FALSE;
     }
 
-    // waiting for response from client
+    printf("Sent encrypted message to Server!\n");
+
+    // waiting for response from server
     unsigned char buffer[BUFFER_SIZE];
-    size_t recv_len = recvfrom(server_fd, buffer, sizeof(buffer), 0, NULL, NULL);
+    size_t recv_len = recvfrom(server_fd, buffer, BUFFER_SIZE, 0, NULL, NULL);
     if (recv_len < 0) {
-        perror("recvfrom - send_and_receive");
-        return;
+        perror("recvfrom - send_user_with_encrypt_sign_and_result");
+        return FALSE;
     }
     
     int encryptMessageSize = recv_len - OQS_SIG_dilithium_2_length_signature;
@@ -331,6 +339,8 @@ int send_user_with_encrypt_sign_and_result(int server_fd, struct sockaddr_in cli
        printf("Failed to Decrypt the message!\n");
        return FALSE;
    }
+
+   printf("Got encrypted message from Server!\n");
 
    return TRUE;
 }
@@ -428,6 +438,7 @@ int main() {
         perror("Receive hello WPF failed");
         return;
     }
+    printf("Got Hello message from WPF receiver: %s \n", buffer);
 
     // loop for safe communication
     while (1)
@@ -450,7 +461,7 @@ int main() {
         else {
             continue;
         }
-        receive_and_send(client_fd, server_addr, &wpfBuffer, &wpf_message_len);
+        receive_and_send(wpf_fd, wpf_client_addr, &wpfBuffer, &wpf_message_len);
         if (isPath == 1)
         {
             rc = read_binary_file(wpfBuffer, &sessionKeyToUse, &keyLenFromFile);
@@ -481,6 +492,8 @@ int main() {
                 perror("sendto wpf");
             }
             isUser = 0;
+            
+            printf("Sent Answer To WPF.\n");
         }
     }
 

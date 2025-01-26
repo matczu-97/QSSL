@@ -27,28 +27,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\czmat\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\raztibi\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Study\\final project\\QSSL_CODE\\qsslWPF\\qsslWPF.csproj",
+      "projectUniqueName": "S:\\QSSL\\qsslWPF\\qsslWPF.csproj",
       "projectName": "qsslWPF",
-      "projectPath": "C:\\Study\\final project\\QSSL_CODE\\qsslWPF\\qsslWPF.csproj",
-      "packagesPath": "C:\\Users\\czmat\\.nuget\\packages\\",
-      "outputPath": "C:\\Study\\final project\\QSSL_CODE\\qsslWPF\\obj\\",
+      "projectPath": "S:\\QSSL\\qsslWPF\\qsslWPF.csproj",
+      "packagesPath": "C:\\Users\\raztibi\\.nuget\\packages\\",
+      "outputPath": "S:\\QSSL\\qsslWPF\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\czmat\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\raztibi\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net5.0-windows"
+        "net5.0-windows7.0"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -58,8 +53,8 @@
         "net5.0-windows7.0": {
           "targetAlias": "net5.0-windows",
           "projectReferences": {
-            "C:\\Study\\final project\\QSSL_CODE\\qsslSdk\\qsslSdk.csproj": {
-              "projectPath": "C:\\Study\\final project\\QSSL_CODE\\qsslSdk\\qsslSdk.csproj"
+            "S:\\QSSL\\qsslSdk\\qsslSdk.csproj": {
+              "projectPath": "S:\\QSSL\\qsslSdk\\qsslSdk.csproj"
             }
           }
         }
@@ -79,29 +74,10 @@
           "net47",
           "net471",
           "net472",
-          "net48",
-          "net481"
+          "net48"
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[5.0.0, 5.0.0]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Host.win-x64",
-            "version": "[5.0.17, 5.0.17]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[5.0.0, 5.0.0]"
-          },
-          {
-            "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[5.0.0, 5.0.0]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
@@ -110,7 +86,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.104\\RuntimeIdentifierGraph.json"
       }
     }
   }

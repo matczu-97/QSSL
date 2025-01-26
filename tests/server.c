@@ -253,6 +253,120 @@ int handshake_server(Server* server, Client_Keys* cl_keys, int server_fd, struct
     return TRUE;
 }
 
+int recv_encrypted_user(int server_fd, struct sockaddr_in client_addr, unsigned char* enc_key, uint8_t* dilithium_client_public_key, 
+                        uint8_t* dilithium_server_private_key, unsigned char* result, size_t* res_len)
+{
+    unsigned char iv[AES_BLOCK_SIZE] = "000000000000000";
+    unsigned char plaintext[256], dil_sign[OQS_SIG_dilithium_2_length_signature];
+    unsigned char* messageToSend = NULL;
+    size_t plain_len = 0, dil_sign_len = 0, sent_len = 0;
+    memset(plaintext, '\0', 256);
+
+    // waiting for message from client
+    unsigned char buffer[BUFFER_SIZE];
+    size_t recv_len = recvfrom(server_fd, buffer, BUFFER_SIZE, 0, NULL, NULL);
+    if (recv_len < 0) {
+        perror("recvfrom - recv_encrypted_user");
+        return;
+    }
+
+    int encryptMessageSize = recv_len - OQS_SIG_dilithium_2_length_signature;
+
+    // verify the message
+    int rc = dilithium_verify(dilithium_client_public_key, buffer, encryptMessageSize, buffer + encryptMessageSize, OQS_SIG_dilithium_2_length_signature);
+    if (rc != TRUE)
+    {
+        printf("Failed to Verify the message! - recv_encrypted_user\n");
+        return FALSE;
+    }
+   
+    // decrypt the data
+    rc = aes_decrypt(enc_key, buffer, encryptMessageSize, iv, result, res_len);
+    if (rc != TRUE)
+    {
+        printf("Failed to Decrypt the message! - recv_encrypted_user\n");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+int send_encrypted_answer(int server_fd, struct sockaddr_in client_addr, unsigned char* enc_key,
+    uint8_t* dilithium_server_private_key, const unsigned char* message, size_t msg_len)
+{
+    unsigned char iv[AES_BLOCK_SIZE] = "000000000000000";
+    unsigned char ciphertext[256], dil_sign[OQS_SIG_dilithium_2_length_signature];
+    unsigned char* messageToSend = NULL;
+    size_t cipher_len = 0, dil_sign_len = 0, sent_len = 0;
+
+    int rc = aes_encrypt(enc_key, message, msg_len, iv, ciphertext, &cipher_len);
+    if (rc != TRUE)
+    {
+        printf("Failed to encrypt the message! - send_encrypted_answer\n");
+        return FALSE;
+    }
+
+    rc = dilithium_sign(dilithium_server_private_key, ciphertext, cipher_len, dil_sign, &dil_sign_len);
+    if (rc != TRUE)
+    {
+        printf("Failed to Sign the message! - send_encrypted_answer\n");
+        return FALSE;
+    }
+
+
+    sent_len = cipher_len + dil_sign_len;
+    messageToSend = malloc(sent_len);
+    if (messageToSend == NULL) {
+        perror("malloc - send_encrypted_answer");
+        return FALSE;
+    }
+
+    // copy encrypted message and signature
+    memcpy(messageToSend, ciphertext, cipher_len);
+    memcpy((messageToSend + cipher_len), dil_sign, dil_sign_len);
+    (messageToSend)[sent_len] = '\0';
+
+    int sendto_len = sendto(server_fd, messageToSend, sent_len, 0, (const struct sockaddr*)&client_addr, sizeof(client_addr));
+    if (sent_len < 0) {
+        perror("sendto - send_encrypted_answer");
+        return FALSE;
+    }
+    else if ((size_t)sendto_len != sent_len) {
+        fprintf(stderr, "Incomplete key sent: %zd/%zu bytes - send_encrypted_answer\n", sendto_len, sent_len);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+int parse_user_and_check_validity(const char* message,size_t len)
+{
+    // Parse the message
+    unsigned short usernameLen = *(unsigned short*)message;
+    // check length
+    if (usernameLen != strlen("admin"))
+        return FALSE;
+    
+    char username[256] = { 0 };
+    memcpy(username, message + 2, usernameLen);
+    username[usernameLen] = "\0";
+
+    unsigned short passwordLen = *(unsigned short*)(message + 2 + usernameLen);
+    // check length
+    if (passwordLen != strlen("password"))
+        return FALSE;
+
+    char password[256] = { 0 };
+    memcpy(password, message + 2 + usernameLen + 2, passwordLen);
+    password[passwordLen] = "\0";
+    
+    // check data
+    if(memcmp(username, "admin", usernameLen) != 0 || memcmp(password, "password", passwordLen) != 0)
+        return FALSE;
+
+    return TRUE;
+}
+
 int main() {
     WSADATA wsaData;
     int server_fd, rc;
@@ -330,10 +444,40 @@ int main() {
     }
 
 
+    size_t buff_len = 0;
+    unsigned char answer[10];
     // loop for safe communication
     while (1)
     {
-        
+        memset(buffer, 0, 256);
+        rc = recv_encrypted_user(server_fd, client_addr, session_key, ck.dilithium_public_key,
+            server.dilithium_private_key, buffer, &buff_len);
+        if (rc != TRUE)
+        {
+            printf("failed to get encrypted user, exiting...\n");
+            break;
+        }
+
+        printf("Got encrypted message from Client\n");
+
+        rc = parse_user_and_check_validity(buffer, buff_len);
+        if (rc == TRUE) {
+            memcpy(answer, "Good", 4); 
+            answer[4] = '\0'; 
+        }
+        else {
+            memcpy(answer, "Bad", 3);
+            answer[3] = '\0'; 
+        }
+
+        rc = send_encrypted_answer(server_fd,client_addr,session_key,server.dilithium_private_key, answer,strlen(answer));
+        if (rc != TRUE)
+        {
+            printf("failed to send encrypted answer, exiting...\n");
+            break;
+        }
+
+        printf("Sent encrypted answer to Client\n");
     }
 
     // Cleanup

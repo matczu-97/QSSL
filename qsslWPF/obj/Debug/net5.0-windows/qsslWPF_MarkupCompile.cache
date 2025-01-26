@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-C:\Study\final project\QSSL_CODE\qsslWPF\obj\Debug\net5.0-windows\
+S:\QSSL\qsslWPF\obj\Debug\net5.0-windows\
 qsslWPF
 none
 false
 TRACE;DEBUG;NET;NET5_0;NETCOREAPP
-C:\Study\final project\QSSL_CODE\qsslWPF\App.xaml
+S:\QSSL\qsslWPF\App.xaml
 4139606054
 
 12302078329
-194-317198817
+194-936823737
 View\LoadingView.xaml;View\LoginView.xaml;View\MainScreenView.xaml;View\SuccessView.xaml;
 
 False

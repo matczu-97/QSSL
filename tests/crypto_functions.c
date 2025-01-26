@@ -244,10 +244,6 @@ int generate_rsa_keys(RSA** rsa_private_key, RSA** rsa_public_key) {
 BOOL aes_encrypt(unsigned char* enc_key, unsigned char* plaintext, size_t plaintext_len, unsigned char* iv,
     unsigned char* ciphertext, size_t* cipher_len)
 {
-    if (!RAND_bytes(iv, AES_BLOCK_SIZE)) {
-        return FALSE;
-    }
-
     AES_KEY aes;
     if (AES_set_encrypt_key(enc_key, AES_KEY_SIZE * 8, &aes) < 0) {
         return FALSE;
