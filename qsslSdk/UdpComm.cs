@@ -29,7 +29,7 @@ namespace qsslSdk
             _remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteAddress), remotePort);
             byte[] data = Encoding.UTF8.GetBytes(message);
             _socket.SendTo(data, _remoteEndPoint);
-            System.Diagnostics.Debug.WriteLine($"Sent: {message} to {remoteAddress}:{remotePort}");
+            System.Diagnostics.Debug.WriteLine($"Sent: {message} to {remoteAddress}:{remotePort}\n");
         }
 
         private string ReceiveMessage()
@@ -37,7 +37,7 @@ namespace qsslSdk
             byte[] buffer = new byte[1024];
             int receivedBytes = _socket.ReceiveFrom(buffer, ref _remoteEndPoint);
             string message = Encoding.UTF8.GetString(buffer, 0, receivedBytes);
-            System.Diagnostics.Debug.WriteLine($"Received: {message} from {_remoteEndPoint}");
+            System.Diagnostics.Debug.WriteLine($"Received: {message} from {_remoteEndPoint}\n");
             return message;
         }
 

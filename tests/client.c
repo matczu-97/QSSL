@@ -339,6 +339,7 @@ int send_user_with_encrypt_sign_and_result(int server_fd, struct sockaddr_in cli
        printf("Failed to Decrypt the message!\n");
        return FALSE;
    }
+   result[*res_len] = "\0";
 
    printf("Got encrypted message from Server!\n");
 
@@ -443,7 +444,7 @@ int main() {
     // loop for safe communication
     while (1)
     {
-        memset(resultofDecryption, 0, 256);
+        memset(resultofDecryption, '\0', 256);
         
         // Receive message from WPF
         receive_and_send(wpf_fd, wpf_client_addr, &wpfBuffer, &wpf_message_len);
@@ -487,13 +488,21 @@ int main() {
                 break;
             }
 
-            size_t sent_len = sendto(wpf_fd, resultofDecryption, resultOfDecryption_len, 0, (const struct sockaddr*)&wpf_client_addr, sizeof(wpf_client_addr));
-            if (sent_len < 0) {
-                perror("sendto wpf");
+            // Check if the message is "Good"
+            if (resultOfDecryption_len == 4 && memcmp(resultofDecryption, "Good", 4) == 0) {
+                size_t sent_len = sendto(wpf_fd, "Good", strlen("Good"), 0, (const struct sockaddr*)&wpf_client_addr, sizeof(wpf_client_addr));
+                if (sent_len < 0) {
+                    perror("sendto wpf");
+                }
+                printf("Sent Good To WPF.\n");
             }
-            isUser = 0;
-            
-            printf("Sent Answer To WPF.\n");
+            else {
+                size_t sent_len = sendto(wpf_fd, "Bad", strlen("Bad"), 0, (const struct sockaddr*)&wpf_client_addr, sizeof(wpf_client_addr));
+                if (sent_len < 0) {
+                    perror("sendto wpf");
+                }
+                printf("Sent Bad To WPF.\n");
+            }
         }
     }
 

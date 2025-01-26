@@ -39,7 +39,7 @@ namespace qsslSdk
                 var message = udpComm.serializeUserModel(userModel);
                 udpComm.SendAndRecv(Encoding.UTF8.GetString(message));
                 loginSuccess = udpComm.recvAndCheckValidation();
-                //Thread.Sleep(5000);
+                Thread.Sleep(5000);
                 // Trigger the login result event
                 LoginResultEvent?.Invoke(loginSuccess);
             });

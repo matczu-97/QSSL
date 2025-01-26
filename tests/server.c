@@ -299,6 +299,7 @@ int send_encrypted_answer(int server_fd, struct sockaddr_in client_addr, unsigne
     unsigned char* messageToSend = NULL;
     size_t cipher_len = 0, dil_sign_len = 0, sent_len = 0;
 
+    memset(ciphertext, '\0', 256);
     int rc = aes_encrypt(enc_key, message, msg_len, iv, ciphertext, &cipher_len);
     if (rc != TRUE)
     {
@@ -349,7 +350,7 @@ int parse_user_and_check_validity(const char* message,size_t len)
     
     char username[256] = { 0 };
     memcpy(username, message + 2, usernameLen);
-    username[usernameLen] = "\0";
+    username[usernameLen] = '\0';
 
     unsigned short passwordLen = *(unsigned short*)(message + 2 + usernameLen);
     // check length
@@ -358,7 +359,7 @@ int parse_user_and_check_validity(const char* message,size_t len)
 
     char password[256] = { 0 };
     memcpy(password, message + 2 + usernameLen + 2, passwordLen);
-    password[passwordLen] = "\0";
+    password[passwordLen] = '\0';
     
     // check data
     if(memcmp(username, "admin", usernameLen) != 0 || memcmp(password, "password", passwordLen) != 0)
@@ -445,11 +446,12 @@ int main() {
 
 
     size_t buff_len = 0;
-    unsigned char answer[10];
+    unsigned char answer[5];
     // loop for safe communication
     while (1)
     {
-        memset(buffer, 0, 256);
+        memset(buffer, '\0', 256);
+        memset(answer, '\0', 5);
         rc = recv_encrypted_user(server_fd, client_addr, session_key, ck.dilithium_public_key,
             server.dilithium_private_key, buffer, &buff_len);
         if (rc != TRUE)
@@ -477,7 +479,7 @@ int main() {
             break;
         }
 
-        printf("Sent encrypted answer to Client\n");
+        printf("Sent encrypted %s to Client\n", answer);
     }
 
     // Cleanup
