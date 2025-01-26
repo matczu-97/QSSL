@@ -34,13 +34,14 @@ namespace qsslSdk
             Task.Run(() =>
             {
                 // Simulate backend login logic
-                bool loginSuccess = userModel.Username == "admin" && userModel.Password == "password";
+                bool loginSuccess;
                 udpComm.SendAndRecv("User");
                 var message = udpComm.serializeUserModel(userModel);
                 udpComm.SendAndRecv(Encoding.UTF8.GetString(message));
-                Thread.Sleep(5000);
+                loginSuccess = udpComm.recvAndCheckValidation();
+                //Thread.Sleep(5000);
                 // Trigger the login result event
-                LoginResultEvent?.Invoke(udpComm.recvAndCheckValidation());
+                LoginResultEvent?.Invoke(loginSuccess);
             });
         }
     }
