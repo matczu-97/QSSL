@@ -171,7 +171,7 @@ int handshake_server(Server* server, Client_Keys* cl_keys, int server_fd, struct
     int rc , errCode = 0;
     unsigned int ecc_signature_len = 0;
     unsigned char* encrypted_key = NULL, *signature = NULL;
-    unsigned char  decrypted_key[RSA_KEY_SIZE / 8];
+    unsigned char  decrypted_key[AES_KEY_SIZE];
     uint8_t* encapsulated_message = NULL, shared_secret[OQS_KEM_kyber_768_length_shared_secret];
     size_t encrypted_len = 0, message_len = 0, decrypted_len = 0, encapsulated_len = 0, dil_sign_len = 0, ecc_sign_len_size_t = 0;
 
@@ -328,7 +328,7 @@ int send_encrypted_answer(int server_fd, struct sockaddr_in client_addr, unsigne
     (messageToSend)[sent_len] = '\0';
 
     int sendto_len = sendto(server_fd, messageToSend, sent_len, 0, (const struct sockaddr*)&client_addr, sizeof(client_addr));
-    if (sent_len < 0) {
+    if (sendto_len < 0) {
         perror("sendto - send_encrypted_answer");
         return FALSE;
     }
