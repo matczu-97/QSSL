@@ -70,7 +70,7 @@ namespace qsslWPF.View {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/qsslWPF;component/view/successview.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/qsslWPF_gatrrkvy_wpftmp;component/view/successview.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\View\SuccessView.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
